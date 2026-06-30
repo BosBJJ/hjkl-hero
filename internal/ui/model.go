@@ -10,14 +10,19 @@ import (
 )
 
 func NewGameModel() GameModel {
-	sMap, _ := levels.GetLevel(1)
-
 	return GameModel{
 		gameState: game.GameState{
 			Player: game.Position{Line: 1, Column: 1},
-			Level:  1,
+			MapInfo: GetMapInfo(),
 		},
-		currentMap: sMap,
+	}
+}
+
+func GetMapInfo() game.MapInfo {
+	sMap, _ := levels.GetLevel(1)
+	return game.MapInfo{
+		Level:    1,
+		LevelMap: sMap,
 	}
 }
 
@@ -25,17 +30,10 @@ type GameModel struct {
 	gameState  game.GameState
 	width      int
 	height     int
-	currentMap levels.LevelMap
 }
 
 func (m GameModel) Init() tea.Cmd {
 	return nil
-}
-
-func tempTestDelete(sMap levels.LevelMap, gs game.GameState) levels.LevelMap {
-	lines := levels.ToLines(sMap)
-	newMap := levels.DeleteAt(lines, gs.Player.Line, gs.Player.Column)
-	return levels.LevelMap(levels.ToText(newMap))
 }
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -45,9 +43,9 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "h", "j", "k", "l":
-			m.gameState.Player.Move(msg.String(), m.width, m.height)
+			m.gameState.Player.Move(msg.String(), m.height, m.width)
 		case "x":
-			m.currentMap = tempTestDelete(m.currentMap, m.gameState)
+			m.gameState.MapInfo = game.DeleteAt(m.gameState)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -57,6 +55,6 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m GameModel) View() string {
-	currentMap := string(render.Render(m.gameState, m.currentMap))
+	currentMap := string(render.Render(m.gameState, m.gameState.MapInfo))
 	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap)
 }

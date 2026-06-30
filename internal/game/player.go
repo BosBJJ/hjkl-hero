@@ -7,11 +7,11 @@ func (p *Position) Move(direction string, maxLine, maxCol int) {
 			p.Line++
 		}
 	case "k":
-		if p.Line > 0 {
+		if p.Line > 1 {
 			p.Line--
 		}
 	case "h":
-		if p.Column > 0 {
+		if p.Column > 1 {
 			p.Column--
 		}
 	case "l":
