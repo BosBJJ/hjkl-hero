@@ -9,15 +9,29 @@ import (
 type MapInfo struct {
 	Level    int
 	LevelMap levels.LevelMap
-	MapType  string
+	MapType  MapType
+}
+type MapType string
+
+const (
+	RoomMap   MapType = "room"
+	EditorMap MapType = "editor"
+)
+
+func GetType(sMap levels.LevelMap) MapType {
+	currMap := string(sMap)
+	if strings.HasPrefix(currMap, "#") {
+		return RoomMap
+	}
+	return EditorMap
 }
 
-func ToLines(m MapInfo) []string {
-	return strings.Split(string(m.LevelMap), "\n")
+func ToLines(gs GameState) []string {
+	return strings.Split(string(gs.MapInfo.LevelMap), "\n")
 }
 
 func DeleteAt(gs GameState) MapInfo {
-	currLine := ToLines(gs.MapInfo)
+	currLine := ToLines(gs)
 	if gs.Player.Line < 0 || gs.Player.Line >= len(currLine) {
 		return gs.MapInfo
 	}
@@ -41,13 +55,13 @@ func ToText(lines []string) string {
 	return strings.Join(lines, "\n")
 }
 
-func IsWall(m MapInfo, line, col int) bool {
-	lines := ToLines(m)
-	if line < 0 || line > len(lines) {
+func IsWall(gs GameState, line, col int) bool {
+	lines := ToLines(gs)
+	if line <= 0 || line > len(lines) {
 		return true
 	}
 	runes := []rune(lines[line])
-	if col < 0 || col > len(runes) {
+	if col <= 0 || col > len(runes) {
 		return true
 	}
 	return runes[col] == '#'

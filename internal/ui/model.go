@@ -19,11 +19,12 @@ func NewGameModel() GameModel {
 }
 
 func GetMapInfo() game.MapInfo {
-	sMap, _ := levels.GetLevel(1)
-	return game.MapInfo{
-		Level:    1,
-		LevelMap: sMap,
-	}
+	info := game.MapInfo{}
+	info.Level = 2
+	sMap, _ := levels.GetLevel(info.Level)
+	info.LevelMap = sMap
+	info.MapType = game.GetType(sMap)
+	return info
 }
 
 type GameModel struct {
@@ -43,7 +44,7 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "h", "j", "k", "l":
-			m.gameState.Player.Move(msg.String(), m.height, m.width)
+			m.gameState.Player.Move(msg.String(), m.gameState)
 		case "x":
 			m.gameState.MapInfo = game.DeleteAt(m.gameState)
 		}
@@ -55,6 +56,6 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m GameModel) View() string {
-	currentMap := string(render.Render(m.gameState, m.gameState.MapInfo))
-	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap)
+	currentMap := string(render.Render(m.gameState))
+	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType)
 }

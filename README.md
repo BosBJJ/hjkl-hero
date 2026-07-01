@@ -1,6 +1,9 @@
 - [x] Import map to bubbletea
 - [x] Track cursor location
 - [x] Display cursor
-- [ ] Prevent cursor from passing #
-
-
+- [x] Prevent cursor from passing #
+- [ ] Clamp cursor position on vertical movement
+- [ ] Add more simple commands
+- [ ] Add enemies or items in room map types
+- [ ] Use lipgloss to add flavor to the maps/entities 
+- [ ] Add more maps

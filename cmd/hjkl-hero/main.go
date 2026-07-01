@@ -2,11 +2,9 @@ package main
 
 import (
 	"log"
-	//	"os"
 
 	"github.com/BosBJJ/hjkl-hero/internal/ui"
 	tea "github.com/charmbracelet/bubbletea"
-	//	"github.com/charmbracelet/lipgloss"
 )
 
 func main() {
