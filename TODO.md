@@ -2,8 +2,11 @@
 - [x] Track cursor location
 - [x] Display cursor
 - [x] Prevent cursor from passing #
-- [ ] Clamp cursor position on vertical movement
+- [x] Clamp cursor position on vertical movement
 - [ ] Add more simple commands
+    - [ ] Setup ability to switch modes, Normal/Replace for now
+    - [ ] Change commands to utilize mode change 
+    - [ ] Model - cmds add new modes to switch
 - [ ] Add enemies or items in room map types
 - [ ] Use lipgloss to add flavor to the maps/entities 
 - [ ] Add more maps

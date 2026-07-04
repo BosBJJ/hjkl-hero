@@ -6,16 +6,17 @@ import (
 
 func Render(gs game.GameState) string {
 	lines := game.ToLines(gs)
-	currLine := gs.Player.Line
-	currRow := gs.Player.Column
-	if currLine < 0 || currLine > len(lines) {
+	playerX := gs.Player.Line
+	playerY := gs.Player.Column
+	if playerX <= 0 || playerX > len(lines) {
 		return string(gs.MapInfo.LevelMap)
 	}
-	runes := []rune(lines[currLine])
-	if currRow < 0 || currRow > len(runes) {
+	currLine := lines[playerX]
+	runes := []rune(currLine)
+	if playerY <= 0 || playerY > len(runes) {
 		return string(gs.MapInfo.LevelMap)
 	}
-	runes[currRow] = '@'
-	lines[currLine] = string(runes)
+	runes[playerY] = '@'
+	lines[playerX] = string(runes)
 	return game.ToText(lines)
 }

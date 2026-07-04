@@ -12,7 +12,7 @@ import (
 func NewGameModel() GameModel {
 	return GameModel{
 		gameState: game.GameState{
-			Player: game.Position{Line: 1, Column: 1},
+			Player:  game.Position{Line: 1, Column: 1},
 			MapInfo: GetMapInfo(),
 		},
 	}
@@ -20,7 +20,7 @@ func NewGameModel() GameModel {
 
 func GetMapInfo() game.MapInfo {
 	info := game.MapInfo{}
-	info.Level = 2
+	info.Level = 1
 	sMap, _ := levels.GetLevel(info.Level)
 	info.LevelMap = sMap
 	info.MapType = game.GetType(sMap)
@@ -28,14 +28,21 @@ func GetMapInfo() game.MapInfo {
 }
 
 type GameModel struct {
-	gameState  game.GameState
-	width      int
-	height     int
+	gameState game.GameState
+	width     int
+	height    int
 }
 
 func (m GameModel) Init() tea.Cmd {
 	return nil
 }
+
+type EditorMode int
+
+const (
+	NormalMode EditorMode = iota
+	ReplaceMode
+)
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -47,6 +54,8 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.gameState.Player.Move(msg.String(), m.gameState)
 		case "x":
 			m.gameState.MapInfo = game.DeleteAt(m.gameState)
+		case "r":
+			m.gameState.MapInfo = game.ReplaceAt(m.gameState, msg.String())
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width

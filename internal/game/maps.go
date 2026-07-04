@@ -9,6 +9,7 @@ import (
 type MapInfo struct {
 	Level    int
 	LevelMap levels.LevelMap
+	LinesMap []string
 	MapType  MapType
 }
 type MapType string
@@ -31,22 +32,45 @@ func ToLines(gs GameState) []string {
 }
 
 func DeleteAt(gs GameState) MapInfo {
-	currLine := ToLines(gs)
-	if gs.Player.Line < 0 || gs.Player.Line >= len(currLine) {
+	mapLines := ToLines(gs)
+	playerX := gs.Player.Line
+	playerY := gs.Player.Column
+
+	if playerX < 0 || playerX >= len(mapLines) {
 		return gs.MapInfo
 	}
-	runes := []rune(currLine[gs.Player.Line])
-	if gs.Player.Column < 0 || gs.Player.Column >= len(runes) {
+	runes := []rune(mapLines[playerX])
+	if playerX < 0 || playerY >= len(runes) {
 		return gs.MapInfo
 	}
 	lastIndex := len(runes) - 1
 	if runes[0] == '#' && runes[lastIndex] == '#' {
-		runes[gs.Player.Column] = '.'
+		runes[playerY] = '.'
 	} else {
-		runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
+		runes = append(runes[:playerY], runes[playerY+2:]...)
 	}
-	currLine[gs.Player.Line] = string(runes)
-	changedLine := ToText(currLine)
+	mapLines[playerX] = string(runes)
+	changedLine := ToText(mapLines)
+	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
+
+	return gs.MapInfo
+}
+
+func ReplaceAt(gs GameState, input string) MapInfo {
+	mapLines := ToLines(gs)
+	playerX := gs.Player.Line
+	playerY := gs.Player.Column
+
+	if playerX < 0 || playerX >= len(mapLines) {
+		return gs.MapInfo
+	}
+	runes := []rune(mapLines[playerX])
+	if playerX < 0 || playerY >= len(runes) {
+		return gs.MapInfo
+	}
+	inputRune := []rune(input)[0]
+	runes[playerY] = inputRune
+	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
 	return gs.MapInfo
 }
