@@ -47,12 +47,14 @@ func DeleteAt(gs GameState) MapInfo {
 	if runes[0] == '#' && runes[lastIndex] == '#' {
 		runes[playerY] = '.'
 	} else {
-		runes = append(runes[:playerY], runes[playerY+2:]...)
+		runes = append(runes[:playerY], runes[playerY+1:]...)
 	}
 	mapLines[playerX] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-
+	if playerY >= len(runes) {
+		playerY = len(runes) - 1
+	}
 	return gs.MapInfo
 }
 
@@ -70,6 +72,7 @@ func ReplaceAt(gs GameState, input string) MapInfo {
 	}
 	inputRune := []rune(input)[0]
 	runes[playerY] = inputRune
+	mapLines[playerX] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
 	return gs.MapInfo

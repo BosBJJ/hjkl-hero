@@ -4,9 +4,9 @@
 - [x] Prevent cursor from passing #
 - [x] Clamp cursor position on vertical movement
 - [ ] Add more simple commands
-    - [ ] Setup ability to switch modes, Normal/Replace for now
-    - [ ] Change commands to utilize mode change 
-    - [ ] Model - cmds add new modes to switch
+    - [x] Setup ability to switch modes, Normal/Replace for now
+    - [x] Change commands to utilize mode change 
+    - [x] Model - cmds add new modes to switch
 - [ ] Add enemies or items in room map types
 - [ ] Use lipgloss to add flavor to the maps/entities 
 - [ ] Add more maps
