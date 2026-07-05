@@ -16,7 +16,7 @@ func NewGameModel() GameModel {
 			MapInfo: GetMapInfo(),
 		},
 		EditorMode:     NormalMode,
-		PendingReplace: false,
+		PendingCmd: false,
 	}
 }
 
@@ -34,7 +34,7 @@ type GameModel struct {
 	width     int
 	height    int
 	EditorMode
-	PendingReplace bool
+	PendingCmd bool
 }
 
 func (m GameModel) Init() tea.Cmd {
@@ -46,6 +46,7 @@ type EditorMode int
 const (
 	NormalMode EditorMode = iota
 	ReplaceMode
+	DeleteMode
 )
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -58,6 +59,8 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateReplace(msg)
 		case m.EditorMode == NormalMode:
 			return m.updateNormal(msg)
+		case m.EditorMode == DeleteMode:
+			return m.updateDelete(msg)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -75,8 +78,11 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "x":
 			m.gameState.MapInfo = game.DeleteAt(m.gameState)
 		case "r":
-			m.PendingReplace = true
+			m.PendingCmd = true
 			m.EditorMode = ReplaceMode
+		case "d":
+			m.PendingCmd = true
+			m.EditorMode = DeleteMode
 		}
 	}
 	return m, nil
@@ -85,16 +91,33 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if m.PendingReplace {
+		if m.PendingCmd {
 			key := msg.String()
 			if key == "esc" {
 				m.EditorMode = NormalMode
-				m.PendingReplace = false
+				m.PendingCmd = false
 				return m, nil
 			}
 			m.gameState.MapInfo = game.ReplaceAt(m.gameState, key)
 			m.EditorMode = NormalMode
-			m.PendingReplace = false
+			m.PendingCmd = false
+		}
+	}
+	return m, nil
+}
+func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if m.PendingCmd {
+			key := msg.String()
+			if key == "esc" {
+				m.EditorMode = NormalMode
+				m.PendingCmd = false
+				return m, nil
+			}
+			m.gameState.MapInfo = game.DeleteDirection(m.gameState, key)
+			m.EditorMode = NormalMode
+			m.PendingCmd = false
 		}
 	}
 	return m, nil
