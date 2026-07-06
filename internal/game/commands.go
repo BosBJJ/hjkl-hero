@@ -8,46 +8,50 @@ import (
 
 // H and L aren't wrong or bugged, for some reason this is how actual VIM accepts these deletes based on position
 // J and K also aren't bugged.. VIM doesn't seem to like trying to delete current + next if there isnt a next
-func DeleteDirection(gs GameState, input string) MapInfo {
+func DeleteDirection(gs GameState, input string) GameState {
 	if gs.MapInfo.MapType != EditorMap {
-		return gs.MapInfo
+		return gs
 	}
 	mapLines := ToLines(gs)
-	playerX := gs.Player.Line
-	playerY := gs.Player.Column
-	if playerX < 0 || playerX >= len(mapLines) {
-		return gs.MapInfo
+	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
+		return gs
 	}
-	runes := []rune(mapLines[playerX])
-	if playerY < 0 {
-		playerY = 0
+	runes := []rune(mapLines[gs.Player.Line])
+	if gs.Player.Column < 0 {
+		gs.Player.Column = 0
 	}
-	if playerY >= len(runes) {
-		playerY = len(runes) - 1
+	if gs.Player.Column >= len(runes) {
+		gs.Player.Column = len(runes) - 1
 	}
 	inputRune := []rune(input)[0]
 	switch inputRune {
 	case 'h':
-		if playerY == 0 {
-			return gs.MapInfo
+		if gs.Player.Column == 0 {
+			return gs
 		}
-		if playerY == 1 {
-			runes = append(runes[:playerY], runes[playerY+1:]...)
+		if gs.Player.Column == 1 {
+			runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
 		} else {
-			runes = append(runes[:playerY-1], runes[playerY:]...)
+			runes = append(runes[:gs.Player.Column-1], runes[gs.Player.Column:]...)
 		}
 	case 'l':
-		runes = append(runes[:playerY], runes[playerY+1:]...)
+		runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
 	case 'd':
-		mapLines = slices.Delete(mapLines, playerX, playerX+1)
+		mapLines = slices.Delete(mapLines, gs.Player.Line, gs.Player.Line+1)
+		gs.Player.AdjustPlayer(mapLines)
+		runes = []rune(mapLines[gs.Player.Line])
 	case 'j':
-		remainingLines := len(mapLines) - playerX
+		remainingLines := len(mapLines) - gs.Player.Line
 		if remainingLines >= 2 {
-			mapLines = slices.Delete(mapLines, playerX, playerX+2)
+			mapLines = slices.Delete(mapLines, gs.Player.Line, gs.Player.Line+2)
+			gs.Player.AdjustPlayer(mapLines)
+			runes = []rune(mapLines[gs.Player.Line])
 		}
 	case 'k':
-		if playerX >= 2 {
-			mapLines = slices.Delete(mapLines, playerX-1, playerX+1)
+		if gs.Player.Line >= 2 {
+			mapLines = slices.Delete(mapLines, gs.Player.Line-1, gs.Player.Line+1)
+			gs.Player.AdjustPlayer(mapLines)
+			runes = []rune(mapLines[gs.Player.Line])
 		}
 	}
 	if len(mapLines) == 1 {
@@ -55,65 +59,64 @@ func DeleteDirection(gs GameState, input string) MapInfo {
 			"  ",
 			"  ",
 		}
-		playerX = 0
+		gs.Player.Line = 1
 	}
-	if playerX >= len(mapLines) {
-		playerX = len(mapLines) - 1
+	if len(runes) == 0 {
+		runes = []rune{
+			' ',
+			' ',
+		}
+		gs.Player.Column = 1
 	}
-	runes = []rune(mapLines[playerX])
-	mapLines[playerX] = string(runes)
+	gs.Player.AdjustPlayer(mapLines)
+	mapLines[gs.Player.Line] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs.MapInfo
+	return gs
 
 }
 
-func DeleteAt(gs GameState) MapInfo {
+func DeleteAt(gs GameState) GameState {
 	mapLines := ToLines(gs)
-	playerX := gs.Player.Line
-	playerY := gs.Player.Column
-
-	if playerX < 0 || playerX >= len(mapLines) {
-		return gs.MapInfo
+	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
+		return gs
 	}
-	runes := []rune(mapLines[playerX])
-	if playerY < 0 {
-		playerY = 0
+	runes := []rune(mapLines[gs.Player.Line])
+	if gs.Player.Column < 0 {
+		gs.Player.Column = 0
 	}
-	if playerY >= len(runes) {
-		playerY = len(runes) - 1
+	if gs.Player.Column >= len(runes) {
+		gs.Player.Column = len(runes) - 1
 	}
 	lastIndex := len(runes) - 1
 	if runes[0] == '#' && runes[lastIndex] == '#' {
-		runes[playerY] = '.'
+		runes[gs.Player.Column] = '.'
 	} else {
-		runes = append(runes[:playerY], runes[playerY+1:]...)
+		runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
 	}
-	mapLines[playerX] = string(runes)
-	if len(mapLines[playerX]) == 1 {
-		mapLines[playerX] = "  "
+	mapLines[gs.Player.Line] = string(runes)
+	if len(mapLines[gs.Player.Line]) == 1 {
+		mapLines[gs.Player.Line] = "  "
 	}
 	changedLine := ToText(mapLines)
+	gs.Player.AdjustPlayer(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs.MapInfo
+	return gs
 }
 
-func ReplaceAt(gs GameState, input string) MapInfo {
+func ReplaceAt(gs GameState, input string) GameState {
 	mapLines := ToLines(gs)
-	playerX := gs.Player.Line
-	playerY := gs.Player.Column
-
-	if playerX < 0 || playerX >= len(mapLines) {
-		return gs.MapInfo
+	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
+		return gs
 	}
-	runes := []rune(mapLines[playerX])
-	if playerX < 0 || playerY >= len(runes) {
-		return gs.MapInfo
+	runes := []rune(mapLines[gs.Player.Line])
+	if gs.Player.Line < 0 || gs.Player.Column >= len(runes) {
+		return gs
 	}
 	inputRune := []rune(input)[0]
-	runes[playerY] = inputRune
-	mapLines[playerX] = string(runes)
+	runes[gs.Player.Column] = inputRune
+	mapLines[gs.Player.Line] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs.MapInfo
+	return gs
 }

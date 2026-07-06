@@ -76,7 +76,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h", "j", "k", "l":
 			m.gameState.Player.Move(msg.String(), m.gameState)
 		case "x":
-			m.gameState.MapInfo = game.DeleteAt(m.gameState)
+			m.gameState = game.DeleteAt(m.gameState)
 		case "r":
 			m.PendingCmd = true
 			m.EditorMode = ReplaceMode
@@ -98,8 +98,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
-			m.gameState.MapInfo = game.ReplaceAt(m.gameState, key)
-			m.gameState.Player.AdjustPlayer(m.gameState)
+			m.gameState = game.ReplaceAt(m.gameState, key)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
@@ -116,15 +115,13 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
-			m.gameState.MapInfo = game.DeleteDirection(m.gameState, key)
-			m.gameState.Player.AdjustPlayer(m.gameState)
+			m.gameState = game.DeleteDirection(m.gameState, key)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
 	}
 	return m, nil
 }
-
 func (m GameModel) View() string {
 	currentMap := string(render.Render(m.gameState))
 	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode)

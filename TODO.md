@@ -7,8 +7,10 @@
     - [x] Setup ability to switch modes, Normal/Replace for now
     - [x] Change commands to utilize mode change 
     - [x] Model - cmds add new modes to switch
-    - [ ] Add a duplicate map to edit
-    - [ ] Validate player location on duplicate, if false - move
 - [ ] Add enemies or items in room map types
+    - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
+    - [ ] Enemy that dies if within 1-2 tiles of player for X duration
+    - [ ] Health pack/Treasures? 
 - [ ] Use lipgloss to add flavor to the maps/entities 
 - [ ] Add more maps
+    - [ ] Procedurally generated? Have some sort of win condition?

@@ -37,8 +37,7 @@ func (p *Position) Move(direction string, gs GameState) {
 	}
 	*p = newPos
 }
-func (p *Position) AdjustPlayer(gs GameState) {
-	lines := ToLines(gs)
+func (p *Position) AdjustPlayer(lines []string) {
 	if len(lines) == 0 {
 		p.Line = 0
 		p.Column = 0
