@@ -37,3 +37,28 @@ func (p *Position) Move(direction string, gs GameState) {
 	}
 	*p = newPos
 }
+func (p *Position) AdjustPlayer(gs GameState) {
+	lines := ToLines(gs)
+	if len(lines) == 0 {
+		p.Line = 0
+		p.Column = 0
+		return
+	}
+	if p.Line >= len(lines) {
+		p.Line = len(lines) - 1
+	}
+	if p.Line < 0 {
+		p.Line = 0
+	}
+	runes := []rune(lines[p.Line])
+	if len(runes) == 0 {
+		p.Column = 0
+		return
+	}
+	if p.Column >= len(runes) {
+		p.Column = len(runes) - 1
+	}
+	if p.Column < 0 {
+		p.Column = 0
+	}
+}

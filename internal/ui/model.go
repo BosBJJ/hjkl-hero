@@ -15,7 +15,7 @@ func NewGameModel() GameModel {
 			Player:  game.Position{Line: 1, Column: 1},
 			MapInfo: GetMapInfo(),
 		},
-		EditorMode:     NormalMode,
+		EditorMode: NormalMode,
 		PendingCmd: false,
 	}
 }
@@ -99,6 +99,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.gameState.MapInfo = game.ReplaceAt(m.gameState, key)
+			m.gameState.Player.AdjustPlayer(m.gameState)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
@@ -116,6 +117,7 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.gameState.MapInfo = game.DeleteDirection(m.gameState, key)
+			m.gameState.Player.AdjustPlayer(m.gameState)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
