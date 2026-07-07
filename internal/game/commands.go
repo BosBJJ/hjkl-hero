@@ -29,18 +29,22 @@ func DeleteDirection(gs GameState, input string) GameState {
 		if gs.Player.Column == 0 {
 			return gs
 		}
+		gs.TakeSnapShot(gs.Player, mapLines)
 		if gs.Player.Column == 1 {
 			runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
 		} else {
 			runes = append(runes[:gs.Player.Column-1], runes[gs.Player.Column:]...)
 		}
 	case 'l':
+		gs.TakeSnapShot(gs.Player, mapLines)
 		runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
 	case 'd':
+		gs.TakeSnapShot(gs.Player, mapLines)
 		mapLines = slices.Delete(mapLines, gs.Player.Line, gs.Player.Line+1)
 		gs.Player.AdjustPlayer(mapLines)
 		runes = []rune(mapLines[gs.Player.Line])
 	case 'j':
+		gs.TakeSnapShot(gs.Player, mapLines)
 		remainingLines := len(mapLines) - gs.Player.Line
 		if remainingLines >= 2 {
 			mapLines = slices.Delete(mapLines, gs.Player.Line, gs.Player.Line+2)
@@ -48,6 +52,7 @@ func DeleteDirection(gs GameState, input string) GameState {
 			runes = []rune(mapLines[gs.Player.Line])
 		}
 	case 'k':
+		gs.TakeSnapShot(gs.Player, mapLines)
 		if gs.Player.Line >= 2 {
 			mapLines = slices.Delete(mapLines, gs.Player.Line-1, gs.Player.Line+1)
 			gs.Player.AdjustPlayer(mapLines)
@@ -88,6 +93,7 @@ func DeleteAt(gs GameState) GameState {
 	if gs.Player.Column >= len(runes) {
 		gs.Player.Column = len(runes) - 1
 	}
+	gs.TakeSnapShot(gs.Player, mapLines)
 	lastIndex := len(runes) - 1
 	if runes[0] == '#' && runes[lastIndex] == '#' {
 		runes[gs.Player.Column] = '.'
@@ -113,10 +119,17 @@ func ReplaceAt(gs GameState, input string) GameState {
 	if gs.Player.Line < 0 || gs.Player.Column >= len(runes) {
 		return gs
 	}
+	gs.TakeSnapShot(gs.Player, mapLines)
 	inputRune := []rune(input)[0]
 	runes[gs.Player.Column] = inputRune
 	mapLines[gs.Player.Line] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
 	return gs
+}
+
+func (gs *GameState) Undo() {
+	previousMap := ToText(gs.MapInfo.MapSnapShot)
+	gs.MapInfo.LevelMap = levels.LevelMap(previousMap)
+	gs.Player = gs.SnapShot
 }

@@ -83,6 +83,8 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "d":
 			m.PendingCmd = true
 			m.EditorMode = DeleteMode
+		case "u":
+			m.gameState.Undo()
 		}
 	}
 	return m, nil

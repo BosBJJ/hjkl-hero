@@ -6,7 +6,7 @@ type Position struct {
 }
 
 type GameState struct {
-	Player  Position
-	MapInfo MapInfo
+	Player   Position
+	SnapShot Position
+	MapInfo  MapInfo
 }
-

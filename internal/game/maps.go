@@ -7,10 +7,11 @@ import (
 )
 
 type MapInfo struct {
-	Level    int
-	LevelMap levels.LevelMap
-	LinesMap []string
-	MapType  MapType
+	Level       int
+	LevelMap    levels.LevelMap
+	LinesMap    []string
+	MapSnapShot []string
+	MapType     MapType
 }
 type MapType string
 
@@ -30,7 +31,6 @@ func GetType(sMap levels.LevelMap) MapType {
 func ToLines(gs GameState) []string {
 	return strings.Split(string(gs.MapInfo.LevelMap), "\n")
 }
-
 
 func ToText(lines []string) string {
 	return strings.Join(lines, "\n")
