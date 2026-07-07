@@ -7,9 +7,11 @@
     - [x] Setup ability to switch modes, Normal/Replace for now
     - [x] Change commands to utilize mode change 
     - [x] Model - cmds add new modes to switch
-    - [ ] Undo CMD
-        - [ ] Make SaveSnapshot func, before making any changes call the func, it will save to mapinfo snapshot []string and gs snap postition
-        - [ ] If undo is pressed, simply replace map and position with snapshots
+    - [x] Undo CMD
+        - [x] Make SaveSnapshot func, before making any changes call the func, it will save to mapinfo snapshot []string and gs snap postition
+        - [x] If undo is pressed, simply replace map and position with snapshots
+        - [x] Add ability to do more than single undo 
+    - [ ] Redo CMD
 - [ ] Add enemies or items in room map types
     - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
     - [ ] Enemy that dies if within 1-2 tiles of player for X duration

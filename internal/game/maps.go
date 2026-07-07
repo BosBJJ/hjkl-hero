@@ -10,7 +10,6 @@ type MapInfo struct {
 	Level       int
 	LevelMap    levels.LevelMap
 	LinesMap    []string
-	MapSnapShot []string
 	MapType     MapType
 }
 type MapType string

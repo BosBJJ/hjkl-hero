@@ -129,7 +129,12 @@ func ReplaceAt(gs GameState, input string) GameState {
 }
 
 func (gs *GameState) Undo() {
-	previousMap := ToText(gs.MapInfo.MapSnapShot)
+	if len(gs.undoSnap) == 0 {
+		return
+	}
+	lastSnap := gs.undoSnap[len(gs.undoSnap)-1]
+	previousMap := ToText(lastSnap.MapSnapShot)
 	gs.MapInfo.LevelMap = levels.LevelMap(previousMap)
-	gs.Player = gs.SnapShot
+	gs.Player = lastSnap.PlayerSnapShot
+	gs.undoSnap = gs.undoSnap[:len(gs.undoSnap)-1]
 }

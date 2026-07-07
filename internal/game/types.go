@@ -7,6 +7,12 @@ type Position struct {
 
 type GameState struct {
 	Player   Position
-	SnapShot Position
 	MapInfo  MapInfo
+	undoSnap []SnapShot
+	redoSnap []SnapShot
+}
+
+type SnapShot struct {
+	PlayerSnapShot Position
+	MapSnapShot    []string
 }
