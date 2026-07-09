@@ -85,6 +85,8 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.EditorMode = DeleteMode
 		case "u":
 			m.gameState.Undo()
+		case "ctrl+r":
+			m.gameState.Redo()
 		}
 	}
 	return m, nil

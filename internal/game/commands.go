@@ -133,8 +133,22 @@ func (gs *GameState) Undo() {
 		return
 	}
 	lastSnap := gs.undoSnap[len(gs.undoSnap)-1]
+	gs.redoSnap = append(gs.redoSnap, gs.CurrentSnapShot())
 	previousMap := ToText(lastSnap.MapSnapShot)
 	gs.MapInfo.LevelMap = levels.LevelMap(previousMap)
 	gs.Player = lastSnap.PlayerSnapShot
 	gs.undoSnap = gs.undoSnap[:len(gs.undoSnap)-1]
+}
+
+func (gs *GameState) Redo() {
+	if len(gs.redoSnap) == 0 {
+		return
+	}
+	lastSnap := gs.redoSnap[len(gs.redoSnap)-1]
+	gs.undoSnap = append(gs.undoSnap, gs.CurrentSnapShot())
+	previousMap := ToText(lastSnap.MapSnapShot)
+	gs.MapInfo.LevelMap = levels.LevelMap(previousMap)
+	gs.Player = lastSnap.PlayerSnapShot
+	gs.redoSnap = gs.redoSnap[:len(gs.redoSnap)-1]
+
 }
