@@ -8,13 +8,13 @@ import (
 
 // H and L aren't wrong or bugged, for some reason this is how actual VIM accepts these deletes based on position
 // J and K also aren't bugged.. VIM doesn't seem to like trying to delete current + next if there isnt a next
-func DeleteDirection(gs GameState, input string) GameState {
+func (gs *GameState) DeleteDirection(input string) {
 	if gs.MapInfo.MapType != EditorMap {
-		return gs
+		return
 	}
-	mapLines := ToLines(gs)
+	mapLines := ToLines(*gs)
 	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
-		return gs
+		return
 	}
 	runes := []rune(mapLines[gs.Player.Line])
 	if gs.Player.Column < 0 {
@@ -27,7 +27,7 @@ func DeleteDirection(gs GameState, input string) GameState {
 	switch inputRune {
 	case 'h':
 		if gs.Player.Column == 0 {
-			return gs
+			return
 		}
 		gs.TakeSnapShot(gs.Player, mapLines)
 		if gs.Player.Column == 1 {
@@ -77,14 +77,12 @@ func DeleteDirection(gs GameState, input string) GameState {
 	mapLines[gs.Player.Line] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs
-
 }
 
-func DeleteAt(gs GameState) GameState {
-	mapLines := ToLines(gs)
+func (gs *GameState) DeleteAt() {
+	mapLines := ToLines(*gs)
 	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
-		return gs
+		return
 	}
 	runes := []rune(mapLines[gs.Player.Line])
 	if gs.Player.Column < 0 {
@@ -107,17 +105,16 @@ func DeleteAt(gs GameState) GameState {
 	changedLine := ToText(mapLines)
 	gs.Player.AdjustPlayer(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs
 }
 
-func ReplaceAt(gs GameState, input string) GameState {
-	mapLines := ToLines(gs)
+func (gs *GameState) ReplaceAt(input string) {
+	mapLines := ToLines(*gs)
 	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
-		return gs
+		return
 	}
 	runes := []rune(mapLines[gs.Player.Line])
 	if gs.Player.Line < 0 || gs.Player.Column >= len(runes) {
-		return gs
+		return
 	}
 	gs.TakeSnapShot(gs.Player, mapLines)
 	inputRune := []rune(input)[0]
@@ -125,7 +122,6 @@ func ReplaceAt(gs GameState, input string) GameState {
 	mapLines[gs.Player.Line] = string(runes)
 	changedLine := ToText(mapLines)
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
-	return gs
 }
 
 func (gs *GameState) Undo() {

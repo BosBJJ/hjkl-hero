@@ -76,7 +76,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h", "j", "k", "l":
 			m.gameState.Player.Move(msg.String(), m.gameState)
 		case "x":
-			m.gameState = game.DeleteAt(m.gameState)
+			m.gameState.DeleteAt()
 		case "r":
 			m.PendingCmd = true
 			m.EditorMode = ReplaceMode
@@ -102,7 +102,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
-			m.gameState = game.ReplaceAt(m.gameState, key)
+			m.gameState.ReplaceAt(key)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
@@ -119,7 +119,7 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
-			m.gameState = game.DeleteDirection(m.gameState, key)
+			m.gameState.DeleteDirection(key)
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
