@@ -35,6 +35,7 @@ type GameModel struct {
 	height    int
 	EditorMode
 	PendingCmd bool
+	CmdCount   int
 }
 
 func (m GameModel) Init() tea.Cmd {
@@ -73,10 +74,19 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
 		case "h", "j", "k", "l":
-			m.gameState.Player.Move(msg.String(), m.gameState)
+			direction := msg.String()
+			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+				gs.Player.Move(direction, *gs)
+			}, m.CmdCount)
+			m.CmdCount = 0
 		case "x":
-			m.gameState.DeleteAt()
+			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+				m.gameState.DeleteAt()
+			}, m.CmdCount)
+			m.CmdCount = 0
 		case "r":
 			m.PendingCmd = true
 			m.EditorMode = ReplaceMode
@@ -84,9 +94,15 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.PendingCmd = true
 			m.EditorMode = DeleteMode
 		case "u":
-			m.gameState.Undo()
+			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+				m.gameState.Undo()
+			}, m.CmdCount)
+			m.CmdCount = 0
 		case "ctrl+r":
+			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
 			m.gameState.Redo()
+			}, m.CmdCount)
+			m.CmdCount = 0
 		}
 	}
 	return m, nil
@@ -119,14 +135,18 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
+			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
 			m.gameState.DeleteDirection(key)
+			}, m.CmdCount)
+			m.CmdCount = 0
 			m.EditorMode = NormalMode
 			m.PendingCmd = false
 		}
 	}
 	return m, nil
 }
+
 func (m GameModel) View() string {
 	currentMap := string(render.Render(m.gameState))
-	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode)
+	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v, Times using next command: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount)
 }

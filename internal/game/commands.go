@@ -6,6 +6,15 @@ import (
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 )
 
+func CmdRepeater(gs *GameState, cmd func(*GameState), count int) {
+	if count == 0 {
+		count = 1
+	}
+	for range count {
+		cmd(gs)
+	}
+}
+
 // H and L aren't wrong or bugged, for some reason this is how actual VIM accepts these deletes based on position
 // J and K also aren't bugged.. VIM doesn't seem to like trying to delete current + next if there isnt a next
 func (gs *GameState) DeleteDirection(input string) {
