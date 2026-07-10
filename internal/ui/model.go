@@ -78,14 +78,14 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
 		case "h", "j", "k", "l":
 			direction := msg.String()
-			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				gs.Player.Move(direction, *gs)
-			}, m.CmdCount)
+			})
 			m.CmdCount = 0
 		case "x":
-			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				m.gameState.DeleteAt()
-			}, m.CmdCount)
+			})
 			m.CmdCount = 0
 		case "r":
 			m.PendingCmd = true
@@ -94,15 +94,18 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.PendingCmd = true
 			m.EditorMode = DeleteMode
 		case "u":
-			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
+			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				m.gameState.Undo()
-			}, m.CmdCount)
+			})
 			m.CmdCount = 0
 		case "ctrl+r":
-			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
-			m.gameState.Redo()
-			}, m.CmdCount)
+			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
+				m.gameState.Redo()
+			})
 			m.CmdCount = 0
+		case "esc": //surprisingly doesn't seem like VIM has timer by default that resets count, only goes away with button press or esc
+			m.CmdCount = 0
+			m.EditorMode = NormalMode
 		}
 	}
 	return m, nil
@@ -135,9 +138,9 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
-			game.CmdRepeater(&m.gameState, func(gs *game.GameState) {
-			m.gameState.DeleteDirection(key)
-			}, m.CmdCount)
+			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
+				m.gameState.DeleteDirection(key)
+			})
 			m.CmdCount = 0
 			m.EditorMode = NormalMode
 			m.PendingCmd = false

@@ -6,7 +6,7 @@ import (
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 )
 
-func CmdRepeater(gs *GameState, cmd func(*GameState), count int) {
+func CmdRepeater(gs *GameState, count int, cmd func(*GameState)) {
 	if count == 0 {
 		count = 1
 	}
