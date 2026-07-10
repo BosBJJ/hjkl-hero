@@ -2,6 +2,7 @@ package render
 
 import (
 	"github.com/BosBJJ/hjkl-hero/internal/game"
+	"github.com/BosBJJ/hjkl-hero/internal/style"
 )
 
 func Render(gs game.GameState) string {
@@ -16,7 +17,12 @@ func Render(gs game.GameState) string {
 	if playerY < 0 || playerY >= len(runes) {
 		return string(gs.MapInfo.LevelMap)
 	}
-	runes[playerY] = '@'
-	lines[playerX] = string(runes)
+	var line string
+	if gs.MapInfo.MapType == game.EditorMap {
+		line = string(runes[:playerY]) + style.CursorStyle.Render(string(runes[playerY])) + string(runes[playerY+1:])
+	} else {
+		line = string(runes[:playerY]) + style.PlayerStyle.Render("@") + string(runes[playerY+1:])
+	}
+	lines[playerX] = line
 	return game.ToText(lines)
 }

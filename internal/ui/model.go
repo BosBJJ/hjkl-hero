@@ -22,7 +22,7 @@ func NewGameModel() GameModel {
 
 func GetMapInfo() game.MapInfo {
 	info := game.MapInfo{}
-	info.Level = 1
+	info.Level = 2
 	sMap, _ := levels.GetLevel(info.Level)
 	info.LevelMap = sMap
 	info.MapType = game.GetType(sMap)
@@ -34,8 +34,10 @@ type GameModel struct {
 	width     int
 	height    int
 	EditorMode
-	PendingCmd bool
-	CmdCount   int
+	PendingCmd   bool
+	CmdCount     int
+	PendingEnter bool
+	CmdText      string
 }
 
 func (m GameModel) Init() tea.Cmd {
@@ -48,6 +50,7 @@ const (
 	NormalMode EditorMode = iota
 	ReplaceMode
 	DeleteMode
+	CommandMode
 )
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -62,6 +65,8 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateNormal(msg)
 		case m.EditorMode == DeleteMode:
 			return m.updateDelete(msg)
+		case m.EditorMode == CommandMode:
+			return m.updateCommand(msg)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -106,6 +111,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc": //surprisingly doesn't seem like VIM has timer by default that resets count, only goes away with button press or esc
 			m.CmdCount = 0
 			m.EditorMode = NormalMode
+		case ":":
+			m.PendingEnter = true
+			m.EditorMode = CommandMode
 		}
 	}
 	return m, nil
@@ -149,7 +157,30 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
+	key := msg.(tea.KeyMsg)
+	switch key.String() {
+	case "esc":
+		m.EditorMode = NormalMode
+		m.PendingEnter = false
+		m.CmdText = ""
+		return m, nil
+	case "enter":
+		switch m.CmdText {
+		case "q!":
+			return m, tea.Quit
+		}
+	case "backspace":
+		if len(m.CmdText) > 0 {
+			m.CmdText = m.CmdText[:len(m.CmdText)-1]
+		}
+	default:
+		m.CmdText += key.String()
+	}
+	return m, nil
+}
+
 func (m GameModel) View() string {
 	currentMap := string(render.Render(m.gameState))
-	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v, Times using next command: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount)
+	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v, Times using next command: %v\n CommandText: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount, m.CmdText)
 }

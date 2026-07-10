@@ -11,13 +11,22 @@
         - [x] Make SaveSnapshot func, before making any changes call the func, it will save to mapinfo snapshot []string and gs snap postition
         - [x] If undo is pressed, simply replace map and position with snapshots
         - [x] Add ability to do more than single undo 
-    - [x] Redo CMD
+        - [x] Redo CMD
     - [ ] Yank
         - [ ] Copy current line? Maybe keep it simple and just have y-y
+    - [ ] : commands
+        - [x] q!
+        - [ ] w/wq
+        - [ ] help - show all available commands
+        - [ ] check? checkhealth? something to verify if map is complete (text editor map)
 - [ ] Add enemies or items in room map types
     - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
     - [ ] Enemy that dies if within 1-2 tiles of player for X duration
     - [ ] Health pack/Treasures? 
 - [ ] Use lipgloss to add flavor to the maps/entities 
+    - [ ] Ability for user to choose their background color/cursor color/player color
+    - [x] Cursor in text map is only highlighted
+    - [x] Color only player in room map
+        - [ ] Game map change color based on health?
 - [ ] Add more maps
     - [ ] Procedurally generated? Have some sort of win condition?
