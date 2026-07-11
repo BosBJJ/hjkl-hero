@@ -157,3 +157,7 @@ func (gs *GameState) Redo() {
 	gs.redoSnap = gs.redoSnap[:len(gs.redoSnap)-1]
 
 }
+
+func (gs *GameState) MapComplete() bool {
+	return gs.MapInfo.LevelMap == gs.MapInfo.AnswerMap
+}

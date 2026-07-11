@@ -13,19 +13,26 @@ func NewGameModel() GameModel {
 	return GameModel{
 		gameState: game.GameState{
 			Player:  game.Position{Line: 1, Column: 1},
-			MapInfo: GetMapInfo(),
+			MapInfo: GetMapInfo(1),
 		},
 		EditorMode: NormalMode,
 		PendingCmd: false,
 	}
 }
 
-func GetMapInfo() game.MapInfo {
+func GetMapInfo(level int) game.MapInfo {
 	info := game.MapInfo{}
-	info.Level = 2
-	sMap, _ := levels.GetLevel(info.Level)
+	info.Level = level
+	sMap, ok := levels.GetLevel(info.Level)
+	if !ok {
+		sMap = "No map available at this level"
+	}
 	info.LevelMap = sMap
 	info.MapType = game.GetType(sMap)
+	if info.MapType == game.EditorMap {
+		aMap := levels.GetAnswer(info.Level)
+		info.AnswerMap = aMap
+	}
 	return info
 }
 
@@ -34,10 +41,10 @@ type GameModel struct {
 	width     int
 	height    int
 	EditorMode
-	PendingCmd   bool
-	CmdCount     int
-	PendingEnter bool
-	CmdText      string
+	PendingCmd  bool
+	CmdCount    int
+	CmdText     string
+	GameMessage string
 }
 
 func (m GameModel) Init() tea.Cmd {
@@ -87,6 +94,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 				gs.Player.Move(direction, *gs)
 			})
 			m.CmdCount = 0
+			m.GameMessage = ""
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				m.gameState.DeleteAt()
@@ -112,7 +120,6 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.CmdCount = 0
 			m.EditorMode = NormalMode
 		case ":":
-			m.PendingEnter = true
 			m.EditorMode = CommandMode
 		}
 	}
@@ -162,13 +169,45 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch key.String() {
 	case "esc":
 		m.EditorMode = NormalMode
-		m.PendingEnter = false
 		m.CmdText = ""
 		return m, nil
 	case "enter":
 		switch m.CmdText {
 		case "q!":
 			return m, tea.Quit
+		case "w":
+			if m.gameState.MapComplete() {
+				m.GameMessage = `Level Completed! Please use ":wq" to close the level!`
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+			} else {
+				m.GameMessage = "Mistakes still found, keep trying"
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+			}
+		case "wq":
+			if m.gameState.MapComplete() {
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+				nextLevel := m.gameState.MapInfo.Level + 1
+				m.gameState.MapInfo = GetMapInfo(nextLevel)
+				m.gameState.Player = game.Position{Line: 1, Column: 1}
+				return m, nil
+			} else {
+				m.GameMessage = `Mistakes still found, keep trying and use ":w" to check status`
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+			}
+		case "GoUpALevel": //REMOVE LATER JUST FOR TESTING
+			m.CmdText = ""
+			m.EditorMode = NormalMode
+			nextLevel := m.gameState.MapInfo.Level + 1
+			m.gameState.MapInfo = GetMapInfo(nextLevel)
+			m.gameState.Player = game.Position{Line: 1, Column: 1}
+			return m, nil
+		default:
+			m.CmdText = ""
+			m.EditorMode = NormalMode
 		}
 	case "backspace":
 		if len(m.CmdText) > 0 {
@@ -182,5 +221,15 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m GameModel) View() string {
 	currentMap := string(render.Render(m.gameState))
-	return fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\n%v\nGame Type: %v\n Editor Mode: %v, Times using next command: %v\n CommandText: %v", m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount, m.CmdText)
+	return fmt.Sprintf(`Current Terminal Size -- Width: %v   Height: %v
+	Player Position --- %v %v
+
+%v
+
+Game Type: %v
+Editor Mode: %v 
+Times using next command: %v
+CommandText: %v
+Game Message: %v`,
+		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage)
 }

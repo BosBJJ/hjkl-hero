@@ -16,9 +16,8 @@
         - [ ] Copy current line? Maybe keep it simple and just have y-y
     - [ ] : commands
         - [x] q!
-        - [ ] w/wq
+        - [x] w/wq, w will check if current map == completed map, if correct will change page to Level Completed Please use :wq, wq verifies and closes the level
         - [ ] help - show all available commands
-        - [ ] check? checkhealth? something to verify if map is complete (text editor map)
 - [ ] Add enemies or items in room map types
     - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
     - [ ] Enemy that dies if within 1-2 tiles of player for X duration

@@ -7,10 +7,10 @@ import (
 )
 
 type MapInfo struct {
-	Level       int
-	LevelMap    levels.LevelMap
-	LinesMap    []string
-	MapType     MapType
+	Level     int
+	LevelMap  levels.LevelMap
+	AnswerMap levels.LevelMap
+	MapType   MapType
 }
 type MapType string
 
