@@ -20,8 +20,9 @@
         - [ ] help - show all available commands
 - [ ] Add enemies or items in room map types
     - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
-    - [ ] Enemy that dies if within 1-2 tiles of player for X duration
-    - [ ] Health pack/Treasures? 
+    - [ ] Enemy that dies if within 1-2 tiles of player for x duration
+    - [ ] health pack/treasures? 
+    - [ ] tickMsg, either once every X seconds spawn or chance to spawn, limit to X per map
 - [ ] Use lipgloss to add flavor to the maps/entities 
     - [ ] Ability for user to choose their background color/cursor color/player color
     - [x] Cursor in text map is only highlighted

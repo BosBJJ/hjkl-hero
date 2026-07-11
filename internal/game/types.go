@@ -7,6 +7,7 @@ type Position struct {
 
 type GameState struct {
 	Player   Position
+	Enemies  []Position
 	MapInfo  MapInfo
 	undoSnap []SnapShot
 	redoSnap []SnapShot

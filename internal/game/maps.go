@@ -46,3 +46,14 @@ func IsWall(gs GameState, line, col int) bool {
 	}
 	return runes[col] == '#'
 }
+
+func GetMapSize(gs GameState) (height, width int) {
+	lines := ToLines(gs)
+	height = len(lines)
+	for _, line := range lines {
+		if len([]rune(line)) > width {
+			width = len([]rune(line))
+		}
+	}
+	return height, width
+}

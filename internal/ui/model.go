@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
@@ -48,7 +49,7 @@ type GameModel struct {
 }
 
 func (m GameModel) Init() tea.Cmd {
-	return nil
+	return doTick()
 }
 
 type EditorMode int
@@ -62,6 +63,11 @@ const (
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tickMsg:
+		if m.gameState.MapInfo.MapType == game.RoomMap {
+			m.gameState.SpawnEnemy()
+		}
+		return m, doTick()
 	case tea.KeyMsg:
 		switch {
 		case msg.String() == "ctrl+c":
@@ -219,6 +225,14 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+type tickMsg time.Time
+
+func doTick() tea.Cmd {
+	return tea.Tick(time.Second*10, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
+}
+
 func (m GameModel) View() string {
 	currentMap := string(render.Render(m.gameState))
 	return fmt.Sprintf(`Current Terminal Size -- Width: %v   Height: %v
@@ -227,9 +241,10 @@ func (m GameModel) View() string {
 %v
 
 Game Type: %v
+Enemies: %v
 Editor Mode: %v 
 Times using next command: %v
 CommandText: %v
 Game Message: %v`,
-		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage)
+		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage)
 }
