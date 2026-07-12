@@ -48,6 +48,14 @@ type GameModel struct {
 	GameMessage string
 }
 
+type tickMsg time.Time
+
+func doTick() tea.Cmd {
+	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
+}
+
 func (m GameModel) Init() tea.Cmd {
 	return doTick()
 }
@@ -101,6 +109,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			})
 			m.CmdCount = 0
 			m.GameMessage = ""
+			m.gameState.ChasePlayer()
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				m.gameState.DeleteAt()
@@ -223,14 +232,6 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.CmdText += key.String()
 	}
 	return m, nil
-}
-
-type tickMsg time.Time
-
-func doTick() tea.Cmd {
-	return tea.Tick(time.Second*10, func(t time.Time) tea.Msg {
-		return tickMsg(t)
-	})
 }
 
 func (m GameModel) View() string {

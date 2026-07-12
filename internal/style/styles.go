@@ -9,5 +9,8 @@ var CursorStyle = lipgloss.NewStyle().
 var PlayerStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("11"))
 
-var EnemyStyle = lipgloss.NewStyle(). //Filler style for now
+var ChaserStyle = lipgloss.NewStyle(). //Filler style for now
 	Background(lipgloss.Color("87"))
+
+var MeleerStyle = lipgloss.NewStyle(). //Filler style for now
+	Background(lipgloss.Color("196"))
