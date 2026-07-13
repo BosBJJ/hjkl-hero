@@ -11,10 +11,17 @@ import (
 )
 
 func NewGameModel() GameModel {
+	stats := game.PlayerInfo{
+		Health:        12,
+		BaseDmg:       4,
+		CritChance:    10, //percent, start with 10%
+		BaseCritMulti: 2,
+	}
 	return GameModel{
 		gameState: game.GameState{
 			Player:  game.Position{Line: 1, Column: 1},
 			MapInfo: GetMapInfo(1),
+			Stats:   stats,
 		},
 		EditorMode: NormalMode,
 		PendingCmd: false,
@@ -46,6 +53,7 @@ type GameModel struct {
 	CmdCount    int
 	CmdText     string
 	GameMessage string
+	EnemyMsg    string
 }
 
 type tickMsg time.Time
@@ -68,6 +76,21 @@ const (
 	DeleteMode
 	CommandMode
 )
+
+func (m EditorMode) String() string {
+	switch m {
+	case NormalMode:
+		return "Normal Mode"
+	case ReplaceMode:
+		return "Replace Mode"
+	case DeleteMode:
+		return "Delete Mode"
+	case CommandMode:
+		return "Command Mode"
+	default:
+		return "InvalidMode"
+	}
+}
 
 func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -109,10 +132,17 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			})
 			m.CmdCount = 0
 			m.GameMessage = ""
-			m.gameState.ChasePlayer()
+			m.EnemyMsg = m.gameState.ChasePlayer()
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
-				m.gameState.DeleteAt()
+				if gs.MapInfo.MapType == game.EditorMap {
+					m.gameState.DeleteAt()
+				} else {
+					combatLog := gs.MeleeAttack()
+					cmbMsg := combatLog.ParseLog()
+					m.GameMessage = cmbMsg
+					m.EnemyMsg = gs.ChasePlayer()
+				}
 			})
 			m.CmdCount = 0
 		case "r":
@@ -246,6 +276,8 @@ Enemies: %v
 Editor Mode: %v 
 Times using next command: %v
 CommandText: %v
-Game Message: %v`,
-		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage)
+Game Message: %v
+Player Health: %v
+Combat Message: %v`,
+		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage, m.gameState.Stats.Health, m.EnemyMsg)
 }

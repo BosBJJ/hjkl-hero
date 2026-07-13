@@ -19,14 +19,15 @@
         - [x] w/wq, w will check if current map == completed map, if correct will change page to Level Completed Please use :wq, wq verifies and closes the level
         - [ ] help - show all available commands
 - [ ] Add enemies or items in room map types
-    - [ ] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
-    - [ ] Enemy that dies if within 1-2 tiles of player for x duration
+    - [x] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
+    - [x] Melee enemy, attacks within 1 tile
+    - [x] Tank enemy, attacks within 1 tile, a lot of health, moves once every X turns
     - [ ] health pack/treasures? 
-    - [ ] tickMsg, either once every X seconds spawn or chance to spawn, limit to X per map
+    - [x] tickMsg, either once every X seconds spawn or chance to spawn, limit to X per map
 - [ ] Use lipgloss to add flavor to the maps/entities 
     - [ ] Ability for user to choose their background color/cursor color/player color
     - [x] Cursor in text map is only highlighted
     - [x] Color only player in room map
         - [ ] Game map change color based on health?
 - [ ] Add more maps
-    - [ ] Procedurally generated? Have some sort of win condition?
+    - [ ] Procedurally generated, win condition go to ^ and press enter (go up a floor)

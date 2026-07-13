@@ -38,6 +38,9 @@ func Render(gs game.GameState) string {
 				if enemy.EnemyType == game.Normal {
 					rendered.WriteString(style.MeleerStyle.Render("M"))
 				}
+				if enemy.EnemyType == game.Tank{
+					rendered.WriteString(style.MeleerStyle.Render("Z"))
+				}
 			default:
 				rendered.WriteString(string(rune))
 			}

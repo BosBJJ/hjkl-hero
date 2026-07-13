@@ -7,7 +7,21 @@ type EnemyType int
 const (
 	Normal EnemyType = iota
 	Chaser
+	Tank
 )
+
+func (e EnemyType) String() string {
+	switch e {
+	case Normal:
+		return "Brawler"
+	case Chaser:
+		return "Chaser"
+	case Tank:
+		return "Tank"
+	default:
+		return "Invalid Enemy Type"
+	}
+}
 
 func (gs *GameState) SpawnEnemy() {
 	height, width := GetMapSize(*gs)
@@ -22,9 +36,12 @@ func (gs *GameState) SpawnEnemy() {
 			continue
 		}
 		roll := rand.IntN(100)
-		if roll < 80 {
+		switch {
+		case roll == 99:
+			newSpawn = MakeTank(line, col)
+		case roll >= 20 && roll < 99:
 			newSpawn = MakeChaser(line, col)
-		} else {
+		default:
 			newSpawn = MakeMeleer(line, col)
 		}
 		if len(gs.Enemies) < 5 {
@@ -45,9 +62,10 @@ func (gs GameState) EnemyAt(line, col int) (EnemyInfo, bool) {
 
 func MakeChaser(line, col int) EnemyInfo {
 	var newChaser EnemyInfo
+	newChaser.Health = 9
+	newChaser.BaseDmg = 1
 	newChaser.Location.Line = line
 	newChaser.Location.Column = col
-	newChaser.Health = 9
 	newChaser.EnemyType = Chaser
 	return newChaser
 }
@@ -55,13 +73,25 @@ func MakeChaser(line, col int) EnemyInfo {
 func MakeMeleer(line, col int) EnemyInfo {
 	var newMob EnemyInfo
 	newMob.Health = 12
+	newMob.BaseDmg = 3
 	newMob.Location.Line = line
 	newMob.Location.Column = col
 	newMob.EnemyType = Normal
 	return newMob
 }
 
-func (gs *GameState) ChasePlayer() {
+func MakeTank(line, col int) EnemyInfo {
+	var newMob EnemyInfo
+	newMob.Health = 40
+	newMob.BaseDmg = 1
+	newMob.Location.Line = line
+	newMob.Location.Column = col
+	newMob.EnemyType = Tank
+	return newMob
+}
+
+func (gs *GameState) ChasePlayer() string {
+	combatMsg := ""
 	for i := len(gs.Enemies) - 1; i >= 0; i-- {
 		enemy := &gs.Enemies[i]
 		clone := *enemy
@@ -70,33 +100,47 @@ func (gs *GameState) ChasePlayer() {
 		trueLineDiff := enemy.Location.Line - gs.Player.Line
 		trueColDiff := enemy.Location.Column - gs.Player.Column
 		switch {
-		case colDiff < lineDiff: //move the longest path to player to prevent spamming two buttons and making enemy move back/forth without getting closer
+		case colDiff <= lineDiff: //move the longest path to player to prevent spamming two buttons and making enemy move back/forth without getting closer
 			clone.moveLine(trueLineDiff)
-			if IsWall(*gs, clone.Location.Line, clone.Location.Column) {
+			if gs.BlockedTile(clone.Location.Line, clone.Location.Column, i) {
 				clone = *enemy
 				clone.moveCol(trueColDiff)
-				if IsWall(*gs, clone.Location.Line, clone.Location.Column) {
+				if gs.BlockedTile(clone.Location.Line, clone.Location.Column, i) {
 					clone = *enemy
 				}
 			}
 		case colDiff > lineDiff:
 			clone.moveCol(trueColDiff)
-			if IsWall(*gs, clone.Location.Line, clone.Location.Column) {
+			if gs.BlockedTile(clone.Location.Line, clone.Location.Column, i) {
 				clone = *enemy
 				clone.moveLine(trueLineDiff)
-				if IsWall(*gs, clone.Location.Line, clone.Location.Column) {
+				if gs.BlockedTile(clone.Location.Line, clone.Location.Column, i) {
 					clone = *enemy
 				}
 			}
 		}
-		enemy.Location = clone.Location
-		if enemy.EnemyType == Chaser {
+		switch enemy.EnemyType {
+		case Chaser:
 			enemy.Health--
-			if enemy.Health == 0 {
+			if enemy.Health <= 0 {
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
+				return combatMsg
+			}
+		case Tank:
+			enemy.MoveCount++
+			if enemy.MoveCount < 5 {
+				clone = *enemy
+			} else {
+				enemy.MoveCount = 0
 			}
 		}
+		if clone.Location == gs.Player {
+			combatMsg = gs.TryDamagePlayer()
+			clone = *enemy
+		}
+		enemy.Location = clone.Location
 	}
+	return combatMsg
 }
 
 func (e *EnemyInfo) moveLine(diff int) {
@@ -113,4 +157,19 @@ func (e *EnemyInfo) moveCol(diff int) {
 	} else {
 		e.Location.Column--
 	}
+}
+
+func (gs GameState) BlockedTile(line, col, idx int) bool {
+	if IsWall(gs, line, col) {
+		return true
+	}
+	for i, enemy := range gs.Enemies {
+		if i == idx {
+			continue
+		}
+		if enemy.Location.Line == line && enemy.Location.Column == col {
+			return true
+		}
+	}
+	return false
 }
