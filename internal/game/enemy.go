@@ -35,6 +35,9 @@ func (gs *GameState) SpawnEnemy() {
 		if IsWall(*gs, line, col) {
 			continue
 		}
+		if _, ok := gs.EnemyAt(line, col); ok {
+			continue
+		}
 		roll := rand.IntN(100)
 		switch {
 		case roll == 99:
@@ -124,7 +127,7 @@ func (gs *GameState) ChasePlayer() string {
 			enemy.Health--
 			if enemy.Health <= 0 {
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
-				return combatMsg
+				continue
 			}
 		case Tank:
 			enemy.MoveCount++

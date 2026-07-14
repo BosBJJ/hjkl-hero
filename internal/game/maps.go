@@ -27,6 +27,11 @@ func GetType(sMap levels.LevelMap) MapType {
 	return EditorMap
 }
 
+func (gs GameState) GetTile(line, col int) rune {
+	lines := ToLines(gs)
+	return []rune(lines[line])[col]
+}
+
 func ToLines(gs GameState) []string {
 	return strings.Split(string(gs.MapInfo.LevelMap), "\n")
 }
@@ -37,11 +42,11 @@ func ToText(lines []string) string {
 
 func IsWall(gs GameState, line, col int) bool {
 	lines := ToLines(gs)
-	if line <= 0 || line > len(lines) {
+	if line < 0 || line >= len(lines) {
 		return true
 	}
 	runes := []rune(lines[line])
-	if col <= 0 || col > len(runes) {
+	if col < 0 || col >= len(runes) {
 		return true
 	}
 	return runes[col] == '#'
