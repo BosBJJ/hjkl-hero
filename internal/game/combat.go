@@ -5,6 +5,62 @@ import (
 	"math/rand/v2"
 )
 
+func (gs *GameState) RangedAttack(direction string) CombatLog {
+	var log CombatLog
+	for i := len(gs.Enemies) - 1; i >= 0; i-- {
+		enemy := &gs.Enemies[i]
+		if enemy.EnemyType == Chaser {
+			continue
+		}
+		enemyLine := enemy.Location.Line
+		enemyCol := enemy.Location.Column
+		playerLine := gs.Player.Line
+		playerCol := gs.Player.Column
+		lineDiff := enemyLine - playerLine
+		colDiff := enemyCol - playerCol
+		inputRune := []rune(direction)[0]
+		switch inputRune {
+		case 'h':
+			if colDiff >= -4 && colDiff < 0 && lineDiff == 0 {
+				log = gs.AttackMob(enemy, Ranged)
+			}
+			if log.Hit == false {
+				continue
+			}
+		case 'l':
+			if colDiff > 0 && colDiff <= 4 && lineDiff == 0 {
+				log = gs.AttackMob(enemy, Ranged)
+			}
+			if log.Hit == false {
+				continue
+			}
+		case 'j':
+			if lineDiff <= 4 && lineDiff > 0 && colDiff == 0 {
+				log = gs.AttackMob(enemy, Ranged)
+			}
+			if log.Hit == false {
+				continue
+			}
+		case 'k':
+			if lineDiff >= -4 && lineDiff < 0 && colDiff == 0 {
+				log = gs.AttackMob(enemy, Ranged)
+			}
+			if log.Hit == false {
+				continue
+			}
+		}
+		if enemy.Health <= 0 {
+			log.EnemyKilled = true
+			xp := enemy.GetExperience(log.AttackStyle)
+			log.Experience = xp
+			gs.Stats.XPGained += xp
+			gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
+			break
+		}
+	}
+	return log
+}
+
 func (gs *GameState) MeleeAttack() CombatLog {
 	var log CombatLog
 	for i := len(gs.Enemies) - 1; i >= 0; i-- {
@@ -18,23 +74,16 @@ func (gs *GameState) MeleeAttack() CombatLog {
 		playerCol := gs.Player.Column
 		lineDiff := getDiff(enemyLine, playerLine)
 		colDiff := getDiff(enemyCol, playerCol)
-		if lineDiff <= 1 && colDiff <= 1 {
-			if !successfulHit() {
-				log.Hit = false
+		if lineDiff <= 1 && colDiff == 0 || lineDiff == 0 && colDiff <= 1 {
+			log = gs.AttackMob(enemy, Melee)
+			if log.Hit == false {
 				continue
 			}
-			damage := gs.Stats.BaseDmg
-			if crit, mulitplier := isCrit(*gs); crit {
-				log.Critical = true
-				damage = damage * mulitplier
-			}
-			enemy.Health -= damage
-			log.EnemyType = enemy.EnemyType
-			log.Hit = true
-			log.DamageDealt = damage
 			if enemy.Health <= 0 {
 				log.EnemyKilled = true
-				log.Experience = enemy.GetExperience(Melee)
+				xp := enemy.GetExperience(log.AttackStyle)
+				gs.Stats.XPGained += xp
+				log.Experience = xp
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			}
 			break
@@ -79,6 +128,28 @@ func (e EnemyInfo) GetExperience(attack AttackType) int {
 	return xpDrop
 }
 
+func (gs *GameState) AttackMob(e *EnemyInfo, style AttackType) CombatLog {
+	var log CombatLog
+	if !successfulHit() {
+		log.Hit = false
+		return log
+	}
+	damage := gs.Stats.BaseDmg
+	log.AttackStyle = style
+	if style == Ranged {
+		damage /= 2
+	}
+	if crit, mulitplier := isCrit(*gs); crit {
+		log.Critical = true
+		damage = damage * mulitplier
+	}
+	e.Health -= damage
+	log.EnemyType = e.EnemyType
+	log.Hit = true
+	log.DamageDealt = damage
+	return log
+}
+
 func isCrit(gs GameState) (bool, int) {
 	roll := rand.IntN(100)
 	if roll <= gs.Stats.CritChance {
@@ -101,19 +172,19 @@ func (gs *GameState) TryDamagePlayer() string {
 			switch enemy.EnemyType { //SWITCH SO LATER CAN ADD DIFFERENT TYPES OF DAMAGES
 			case Normal:
 				if successfulHit() {
-					gs.Stats.Health -= enemy.BaseDmg
+					gs.Stats.CurrentHealth -= enemy.BaseDmg
 					hitMsg = fmt.Sprintf("Enemy %v hit player for %v", enemy.EnemyType, enemy.BaseDmg)
 				}
 			case Chaser:
 				if successfulHit() {
-					gs.Stats.Health -= enemy.BaseDmg
+					gs.Stats.CurrentHealth -= enemy.BaseDmg
 					hitMsg = fmt.Sprintf("You were hit by a %v for %v damage! Make sure to dodge!", enemy.EnemyType, enemy.BaseDmg)
 					enemy.Health = 0
 					gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 				}
 			case Tank:
 				if successfulHit() {
-					gs.Stats.Health -= enemy.BaseDmg
+					gs.Stats.CurrentHealth -= enemy.BaseDmg
 					hitMsg = fmt.Sprintf("Enemy %v hit player for %v", enemy.EnemyType, enemy.BaseDmg)
 				}
 			}

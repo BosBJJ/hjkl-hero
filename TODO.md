@@ -31,3 +31,8 @@
         - [ ] Game map change color based on health?
 - [ ] Add more maps
     - [ ] Procedurally generated, win condition go to ^ and press enter (go up a floor)
+
+
+- [x] Add win condition for rooms
+- [x] Add directional attack
+- [x] Change how player spawns on new map

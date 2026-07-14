@@ -61,3 +61,46 @@ func (p *Position) AdjustPlayer(lines []string) {
 		p.Column = 0
 	}
 }
+
+func (gs *GameState) SpawnPlayer() Position {
+	var pos Position
+	if gs.MapInfo.MapType == EditorMap {
+		pos.Line = 1
+		pos.Column = 1
+		return pos
+	}
+	lines := ToLines(*gs)
+	for lineNum, line := range lines {
+		for col := range line {
+			_, hasEnemy := gs.EnemyAt(lineNum, col)
+			if hasEnemy {
+				continue
+			}
+			if IsWall(*gs, lineNum, col) {
+				continue
+			}
+			pos.Line = lineNum
+			pos.Column = col
+			return pos
+		}
+	}
+	return pos
+}
+
+func (gs *GameState) LevelStats(input string) {
+	if gs.Stats.XPGained <= 9 {
+		return
+	}
+	switch input {
+	case "h":
+		gs.Stats.MaxHealth += 2
+		gs.Stats.CurrentHealth += 1
+	case "d":
+		gs.Stats.BaseDmg += 3
+	case "c":
+		gs.Stats.CritChance += 2
+	case "m":
+		gs.Stats.BaseCritMulti += 1
+	}
+	gs.Stats.XPGained -= 10
+}

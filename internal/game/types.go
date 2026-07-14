@@ -15,10 +15,12 @@ type GameState struct {
 }
 
 type PlayerInfo struct {
-	Health        int
+	MaxHealth     int
+	CurrentHealth int
 	BaseDmg       int
 	CritChance    int
 	BaseCritMulti int
+	XPGained      int
 }
 
 type SnapShot struct {
@@ -41,4 +43,5 @@ type CombatLog struct {
 	Critical    bool
 	DamageDealt int
 	Experience  int
+	AttackStyle AttackType
 }
