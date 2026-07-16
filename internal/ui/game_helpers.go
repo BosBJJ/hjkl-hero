@@ -1,34 +1,24 @@
 package ui
 
-import (
-	"github.com/BosBJJ/hjkl-hero/internal/game"
-	"github.com/BosBJJ/hjkl-hero/internal/levels"
-)
+import "github.com/BosBJJ/hjkl-hero/internal/game"
 
 func (m *GameModel) LevelUp() {
 	m.CmdText = ""
 	m.GameMessage = ""
 	m.EditorMode = NormalMode
 	nextLevel := m.gameState.MapInfo.Level + 1
-	m.gameState.MapInfo = GetMapInfo(nextLevel)
+	m.gameState.MapInfo = game.GetMapInfo(nextLevel)
 	m.gameState.Enemies = nil
 	m.gameState.Player = m.gameState.SpawnPlayer()
 }
 
-func GetMapInfo(level int) game.MapInfo {
-	info := game.MapInfo{}
-	info.Level = level
-	sMap, ok := levels.GetLevel(info.Level)
-	if !ok {
-		sMap = "No map available at this level"
+func (m *GameModel) CheckGameState() {
+	if m.gameState.MapInfo.Level > 15 {
+		m.GameOver = true
 	}
-	info.LevelMap = sMap
-	info.MapType = game.GetType(sMap)
-	if info.MapType == game.EditorMap {
-		aMap := levels.GetAnswer(info.Level)
-		info.AnswerMap = aMap
+	if m.gameState.Stats.CurrentHealth <= 0 {
+		m.GameOver = true
 	}
-	return info
 }
 
 type EditorMode int

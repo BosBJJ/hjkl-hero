@@ -5,13 +5,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tickMsg:
-		if m.gameState.MapInfo.MapType == game.RoomMap {
-			m.gameState.SpawnEnemy()
-		}
-		return m, doTick()
 	case tea.KeyMsg:
 		switch {
 		case msg.String() == "ctrl+c":
@@ -32,7 +27,7 @@ func (m GameModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -46,6 +41,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.CmdCount = 0
 			m.GameMessage = ""
 			m.EnemyMsg = m.gameState.ChasePlayer()
+			m.CheckGameState()
 			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.GameMessage = "You have reached the stairs! Press SPACE to go to next floor!"
 			}
@@ -58,8 +54,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmbMsg := combatLog.ParseLog()
 					m.GameMessage = cmbMsg
 					m.EnemyMsg = gs.ChasePlayer()
+					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelPending = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
+						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
 					}
 				}
 			})
@@ -90,13 +87,14 @@ func (m GameModel) updateNormal(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.LevelUp()
+				m.CheckGameState()
 			}
 		}
 	}
 	return m, nil
 }
 
-func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m GameModel) updateReplace(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if m.PendingCmd {
@@ -112,7 +110,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.gameState.MapInfo.MapType == game.RoomMap {
 				m.gameState.LevelStats(key)
 				if m.gameState.Stats.XPGained < 10 {
-					m.LevelPending = ""
+					m.LevelMsg = ""
 				}
 			}
 			m.EditorMode = NormalMode
@@ -121,7 +119,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	return m, nil
 }
-func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if m.PendingCmd {
@@ -139,8 +137,9 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmbMsg := combatLog.ParseLog()
 					m.GameMessage = cmbMsg
 					m.EnemyMsg = gs.ChasePlayer()
+					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelPending = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
+						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
 					}
 				}
 			})
@@ -152,7 +151,7 @@ func (m GameModel) updateDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 	key := msg.(tea.KeyMsg)
 	switch key.String() {
 	case "esc":
@@ -176,6 +175,7 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "wq":
 			if m.gameState.MapComplete() {
 				m.LevelUp()
+				m.CheckGameState()
 				return m, nil
 			} else {
 				m.GameMessage = `Mistakes still found, keep trying and use ":w" to check status`
@@ -184,6 +184,7 @@ func (m GameModel) updateCommand(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "GoUpALevel": //REMOVE LATER JUST FOR TESTING
 			m.LevelUp()
+			m.CheckGameState()
 			return m, nil
 		default:
 			m.CmdText = ""

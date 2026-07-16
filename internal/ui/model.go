@@ -1,46 +1,21 @@
 package ui
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
-	"github.com/BosBJJ/hjkl-hero/internal/render"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func NewGameModel() GameModel {
-	stats := game.PlayerInfo{
-		MaxHealth:     12,
-		CurrentHealth: 12,
-		BaseDmg:       4,
-		CritChance:    10, //percent, start with 10%
-		BaseCritMulti: 2,
-		XPGained:      0,
-	}
-	return GameModel{
-		gameState: game.GameState{
-			Player:  game.Position{Line: 1, Column: 1},
-			MapInfo: GetMapInfo(1),
-			Stats:   stats,
-		},
-		EditorMode: NormalMode,
-		PendingCmd: false,
-	}
-}
+type Screen int
 
-type GameModel struct {
-	gameState game.GameState
-	width     int
-	height    int
-	EditorMode
-	PendingCmd   bool
-	CmdCount     int
-	CmdText      string
-	GameMessage  string
-	EnemyMsg     string
-	LevelPending string
-}
+const (
+	MainMenuScreen Screen = iota
+	GameScreen
+	GameOverScreen
+	HighScoresScreen
+	SettingsScreen
+)
 
 type tickMsg time.Time
 
@@ -50,27 +25,81 @@ func doTick() tea.Cmd {
 	})
 }
 
-func (m GameModel) Init() tea.Cmd {
+type Model struct {
+	Screen   Screen
+	Menu     MenuModel
+	Game     GameModel
+	GameOver GameOverModel
+}
+
+func NewModel() Model {
+	return Model{
+		Menu:     MakeMenu(),
+		Game:     NewGameModel(),
+		GameOver: MakeGameOver(),
+	}
+}
+
+func (m Model) Init() tea.Cmd {
 	return doTick()
 }
 
-func (m GameModel) View() string {
-	currentMap := string(render.Render(m.gameState))
-	return fmt.Sprintf(`Current Terminal Size -- Width: %v   Height: %v
-	Player Position --- %v %v
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tickMsg:
+		if m.Game.gameState.MapInfo.MapType == game.RoomMap {
+			m.Game.gameState.SpawnEnemy()
+		}
+		return m, doTick()
+	case tea.KeyMsg:
+		switch {
+		case msg.String() == "ctrl+c":
+			return m, tea.Quit
+		}
+		switch m.Screen {
+		case MainMenuScreen:
+			menu, cmd := m.Menu.UpdateMenu(msg)
+			m.Menu = menu
+			switch menu.Selected {
+			case 0:
+				m.Screen = GameScreen
+				m.Menu.Selected = -1
+			case 3:
+				return m, tea.Quit
+			}
+			return m, cmd
+		case GameScreen:
+			game, cmd := m.Game.Update(msg)
+			m.Game = game
+			if game.GameOver{
+				m.Screen = GameOverScreen
+			}
+			return m, cmd
+		case GameOverScreen:
+			gameOver, cmd := m.GameOver.UpdateGameOver(msg)
+			m.GameOver = gameOver
+			switch gameOver.Selected {
+			case 0:
+				m.Screen = MainMenuScreen
+				m.GameOver.Selected = -1
+			case 1:
+				m.Screen = MainMenuScreen
+				m.GameOver.Selected = -1
+			}
+			return m, cmd
+		}
+	}
+	return m, nil
+}
 
-%v
-
-Game Type: %v
-Enemies: %v
-Editor Mode: %v 
-Times using next command: %v
-CommandText: %v
-Game Message: %v
-Current Health: %v
-Max Health: %v
-Combat Message: %v
-%v
-XP %v/10`,
-		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, currentMap, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.EditorMode, m.CmdCount, m.CmdText, m.GameMessage, m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth, m.EnemyMsg, m.LevelPending, m.gameState.Stats.XPGained)
+func (m Model) View() string {
+	switch m.Screen {
+	case MainMenuScreen:
+		return m.Menu.ViewMenu()
+	case GameScreen:
+		return m.Game.ViewGame()
+	case GameOverScreen:
+		return m.GameOver.ViewGameOver()
+	}
+	return "No Screen Selected"
 }

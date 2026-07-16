@@ -19,6 +19,22 @@ const (
 	EditorMap MapType = "editor"
 )
 
+func GetMapInfo(level int) MapInfo {
+	info := MapInfo{}
+	info.Level = level
+	sMap, ok := levels.GetLevel(info.Level)
+	if !ok {
+		sMap = "No map available at this level"
+	}
+	info.LevelMap = sMap
+	info.MapType = GetType(sMap)
+	if info.MapType == EditorMap {
+		aMap := levels.GetAnswer(info.Level)
+		info.AnswerMap = aMap
+	}
+	return info
+}
+
 func GetType(sMap levels.LevelMap) MapType {
 	currMap := string(sMap)
 	if strings.HasPrefix(currMap, "#") {
