@@ -1,16 +1,17 @@
 package ui
 
 import (
-	"fmt"
-
+	"github.com/BosBJJ/hjkl-hero/internal/style"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
-
 
 type GameOverModel struct {
 	Cursor   int
 	Options  []string
 	Selected int
+	height   int
+	width    int
 }
 
 func MakeGameOver() GameOverModel {
@@ -22,6 +23,9 @@ func MakeGameOver() GameOverModel {
 
 func (m GameOverModel) UpdateGameOver(msg tea.Msg) (GameOverModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "j":
@@ -40,14 +44,39 @@ func (m GameOverModel) UpdateGameOver(msg tea.Msg) (GameOverModel, tea.Cmd) {
 }
 
 func (m GameOverModel) ViewGameOver() string {
-	s := "Game Over!\n"
+	const Title = `
+ ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
+██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗
+██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝
+██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗
+╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║
+ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝
+                                                                          `
+	title := style.MenuTitleStyle.
+		Width(m.width).
+		Align(lipgloss.Center).
+		Render(Title) + "\n"
+
+	optionBoxes := []string{}
 
 	for i, option := range m.Options {
-		cursor := " "
 		if m.Cursor == i {
-			cursor = ">"
+			optionBoxes = append(optionBoxes, style.CurrentOptionStyle.
+				Align(lipgloss.Center).
+				AlignVertical(lipgloss.Center).
+				Width(80).
+				Height(3).
+				Render(option)+"\n")
+		} else {
+			optionBoxes = append(optionBoxes, style.OptionsStyle.
+				Align(lipgloss.Center).
+				AlignVertical(lipgloss.Center).
+				Width(80).
+				Height(3).
+				Render(option)+"\n")
 		}
-		s += fmt.Sprintf("%v %v\n", cursor, option)
 	}
-	return s
+	gameOverMessage := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
+
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Top, "\n\n\n\n\n\n\n\n\n\n"+gameOverMessage)
 }

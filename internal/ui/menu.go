@@ -1,12 +1,14 @@
 package ui
 
 import (
-	"fmt"
-
+	"github.com/BosBJJ/hjkl-hero/internal/style"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type MenuModel struct {
+	width    int
+	height   int
 	Cursor   int
 	Options  []string
 	Selected int
@@ -21,6 +23,9 @@ func MakeMenu() MenuModel {
 
 func (m MenuModel) UpdateMenu(msg tea.Msg) (MenuModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "j":
@@ -39,15 +44,39 @@ func (m MenuModel) UpdateMenu(msg tea.Msg) (MenuModel, tea.Cmd) {
 }
 
 func (m MenuModel) ViewMenu() string {
-	s := "Welcome to HJKL Hero!\n"
+	const Title = `
+██╗  ██╗     ██╗██╗  ██╗██╗         ██╗  ██╗███████╗██████╗  ██████╗ 
+██║  ██║     ██║██║ ██╔╝██║         ██║  ██║██╔════╝██╔══██╗██╔═══██╗
+███████║     ██║█████╔╝ ██║         ███████║█████╗  ██████╔╝██║   ██║
+██╔══██║██   ██║██╔═██╗ ██║         ██╔══██║██╔══╝  ██╔══██╗██║   ██║
+██║  ██║╚█████╔╝██║  ██╗███████╗    ██║  ██║███████╗██║  ██║╚██████╔╝
+╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ 
+                                                                     `
+	title := style.MenuTitleStyle.
+		Width(m.width).
+		Align(lipgloss.Center).
+		Render(Title) + "\n"
+
+	optionBoxes := []string{}
 
 	for i, option := range m.Options {
-		cursor := " "
 		if m.Cursor == i {
-			cursor = ">"
+			optionBoxes = append(optionBoxes, style.CurrentOptionStyle.
+				Align(lipgloss.Center).
+				AlignVertical(lipgloss.Center).
+				Width(80).
+				Height(3).
+				Render(option)+"\n")
+		} else {
+			optionBoxes = append(optionBoxes, style.OptionsStyle.
+				Align(lipgloss.Center).
+				AlignVertical(lipgloss.Center).
+				Width(80).
+				Height(3).
+				Render(option)+"\n")
 		}
-		s += fmt.Sprintf("%v %v\n", cursor, option)
 	}
-	s += "Press ctrl+c to quit\n"
-	return s
+	menu := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
+
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Top, "\n\n\n\n"+menu)
 }

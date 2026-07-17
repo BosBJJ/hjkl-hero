@@ -30,6 +30,7 @@ type Model struct {
 	Menu     MenuModel
 	Game     GameModel
 	GameOver GameOverModel
+	Settings SettingsModel
 }
 
 func NewModel() Model {
@@ -37,6 +38,7 @@ func NewModel() Model {
 		Menu:     MakeMenu(),
 		Game:     NewGameModel(),
 		GameOver: MakeGameOver(),
+		Settings: MakeSettingsModel(),
 	}
 }
 
@@ -46,6 +48,20 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		menu, _ := m.Menu.UpdateMenu(msg)
+		m.Menu = menu
+
+		game, _ := m.Game.Update(msg)
+		m.Game = game
+
+		gameOver, _ := m.GameOver.UpdateGameOver(msg)
+		m.GameOver = gameOver
+
+		optMenu, _ := m.Settings.UpdateSettings(msg)
+		m.Settings = optMenu
+
+		return m, nil
 	case tickMsg:
 		if m.Game.gameState.MapInfo.MapType == game.RoomMap {
 			m.Game.gameState.SpawnEnemy()
@@ -64,6 +80,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case 0:
 				m.Screen = GameScreen
 				m.Menu.Selected = -1
+			case 2:
+				m.Screen = SettingsScreen
+				m.Menu.Selected = -1
 			case 3:
 				return m, tea.Quit
 			}
@@ -71,7 +90,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case GameScreen:
 			game, cmd := m.Game.Update(msg)
 			m.Game = game
-			if game.GameOver{
+			if game.GameOver {
 				m.Screen = GameOverScreen
 			}
 			return m, cmd
@@ -87,6 +106,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.GameOver.Selected = -1
 			}
 			return m, cmd
+		case SettingsScreen:
+			settings, cmd := m.Settings.UpdateSettings(msg)
+			m.Settings = settings
+			switch settings.Selected {
+			case 2:
+				m.Screen = MainMenuScreen
+				m.Settings.Selected = -1
+			}
+			return m, cmd
 		}
 	}
 	return m, nil
@@ -100,6 +128,8 @@ func (m Model) View() string {
 		return m.Game.ViewGame()
 	case GameOverScreen:
 		return m.GameOver.ViewGameOver()
+	case SettingsScreen:
+		return m.Settings.ViewSettings()
 	}
 	return "No Screen Selected"
 }
