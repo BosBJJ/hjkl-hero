@@ -1,7 +1,8 @@
 package style
 
 import "github.com/charmbracelet/lipgloss"
-//Shoutout to my favorite theme https://github.com/kbraggins/duskhaven.nvim/blob/main/lua/duskhaven/palette.lua
+
+// Shoutout to my favorite theme https://github.com/kbraggins/duskhaven.nvim/blob/main/lua/duskhaven/palette.lua
 var (
 	Bg      = lipgloss.Color("#0c1021")
 	BgLight = lipgloss.Color("#1a1f35")
@@ -30,3 +31,4 @@ var (
 
 	Black = lipgloss.Color("#272822")
 )
+

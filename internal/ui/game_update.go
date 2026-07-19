@@ -31,13 +31,14 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		case "1", "2", "3", "4", "5", "6", "7", "8", "9", "0":
 			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
 		case "h", "j", "k", "l":
 			direction := msg.String()
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				gs.Player.Move(direction, *gs)
 			})
+			m.TotalMoves += 1
 			m.CmdCount = 0
 			m.GameMessage = ""
 			m.EnemyMsg = m.gameState.ChasePlayer()
@@ -59,6 +60,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
 					}
 				}
+				m.TotalMoves += 1
 			})
 			m.CmdCount = 0
 		case "r":
@@ -78,6 +80,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				m.gameState.Redo()
 			})
+			m.TotalMoves += 1
 			m.CmdCount = 0
 		case "esc": //surprisingly doesn't seem like VIM has timer by default that resets count, only goes away with button press or esc
 			m.CmdCount = 0
@@ -88,6 +91,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.LevelUp()
 				m.CheckGameState()
+				m.TotalMoves += 1
 			}
 		}
 	}
@@ -106,6 +110,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (GameModel, tea.Cmd) {
 			}
 			if m.gameState.MapInfo.MapType == game.EditorMap {
 				m.gameState.ReplaceAt(key)
+				m.TotalMoves += 1
 			}
 			if m.gameState.MapInfo.MapType == game.RoomMap {
 				m.gameState.LevelStats(key)
@@ -142,6 +147,7 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
 					}
 				}
+				m.TotalMoves += 1
 			})
 			m.CmdCount = 0
 			m.EditorMode = NormalMode

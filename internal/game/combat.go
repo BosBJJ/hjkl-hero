@@ -54,6 +54,8 @@ func (gs *GameState) RangedAttack(direction string) CombatLog {
 			xp := enemy.GetExperience(log.AttackStyle)
 			log.Experience = xp
 			gs.Stats.XPGained += xp
+			gs.Stats.TotalXP += xp
+			gs.Stats.Kills += 1
 			gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			break
 		}
@@ -83,6 +85,8 @@ func (gs *GameState) MeleeAttack() CombatLog {
 				log.EnemyKilled = true
 				xp := enemy.GetExperience(log.AttackStyle)
 				gs.Stats.XPGained += xp
+				gs.Stats.TotalXP += xp
+				gs.Stats.Kills += 1
 				log.Experience = xp
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			}

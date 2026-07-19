@@ -26,3 +26,17 @@ var MenuBoxStyle = lipgloss.NewStyle().
 	BorderForeground(Green).
 	Padding(1, 2).
 	Align(lipgloss.Center)
+
+var HSStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	Background(Green).
+	BorderForeground(BlueDark).
+	Foreground(BlueDark).
+	Bold(true)
+
+var HeaderStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	Background(BlueLight).
+	BorderForeground(Black).
+	Foreground(Black).
+	Bold(true)

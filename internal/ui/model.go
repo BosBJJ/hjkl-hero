@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
+	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -26,19 +28,23 @@ func doTick() tea.Cmd {
 }
 
 type Model struct {
-	Screen   Screen
-	Menu     MenuModel
-	Game     GameModel
-	GameOver GameOverModel
-	Settings SettingsModel
+	Screen     Screen
+	Menu       MenuModel
+	Game       GameModel
+	GameOver   GameOverModel
+	Settings   SettingsModel
+	HighScores HighScoresModel
+	DB         *sql.DB
 }
 
-func NewModel() Model {
+func NewModel(db *sql.DB) Model {
 	return Model{
-		Menu:     MakeMenu(),
-		Game:     NewGameModel(),
-		GameOver: MakeGameOver(),
-		Settings: MakeSettingsModel(),
+		Menu:       MakeMenu(),
+		Game:       MakeDefaultGameModel(),
+		GameOver:   MakeGameOver(),
+		Settings:   MakeSettingsModel(),
+		HighScores: MakeHighScores(),
+		DB:         db,
 	}
 }
 
@@ -61,6 +67,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		optMenu, _ := m.Settings.UpdateSettings(msg)
 		m.Settings = optMenu
 
+		hs, _ := m.HighScores.UpdateHighScores(msg)
+		m.HighScores = hs
+
 		return m, nil
 	case tickMsg:
 		if m.Game.gameState.MapInfo.MapType == game.RoomMap {
@@ -78,7 +87,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Menu = menu
 			switch menu.Selected {
 			case 0:
+				m.Game = MakeDefaultGameModel()
 				m.Screen = GameScreen
+				m.Menu.Selected = -1
+			case 1:
+				hs, _ := storage.ShowScores(m.DB)
+				m.HighScores.Scores = hs
+				m.Screen = HighScoresScreen
 				m.Menu.Selected = -1
 			case 2:
 				m.Screen = SettingsScreen
@@ -91,6 +106,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			game, cmd := m.Game.Update(msg)
 			m.Game = game
 			if game.GameOver {
+				m.GameOver.Stats = GetRunStats(m.Game)
 				m.Screen = GameOverScreen
 			}
 			return m, cmd
@@ -99,7 +115,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.GameOver = gameOver
 			switch gameOver.Selected {
 			case 0:
-				m.Screen = MainMenuScreen
+				storage.SaveRun(m.DB, storage.Run{
+					PlayerName: gameOver.PlayerName,
+					Kills:      gameOver.Stats.Kills,
+					TotalXp:    gameOver.Stats.TotalXp,
+					TotalMoves: gameOver.Stats.TotalMoves,
+					MapLevel:   gameOver.Stats.MapLevel,
+					GameMode:   storage.TutorialMode,
+				})
+				hs, _ := storage.ShowScores(m.DB)
+				m.HighScores.Scores = hs
+				m.Screen = HighScoresScreen
 				m.GameOver.Selected = -1
 			case 1:
 				m.Screen = MainMenuScreen
@@ -113,6 +139,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case 2:
 				m.Screen = MainMenuScreen
 				m.Settings.Selected = -1
+			}
+			return m, cmd
+		case HighScoresScreen:
+			hs, cmd := m.HighScores.UpdateHighScores(msg)
+			m.HighScores = hs
+			switch hs.Selected {
+			case 0:
+				m.Screen = MainMenuScreen
+				m.HighScores.Selected = -1
 			}
 			return m, cmd
 		}
@@ -130,6 +165,8 @@ func (m Model) View() string {
 		return m.GameOver.ViewGameOver()
 	case SettingsScreen:
 		return m.Settings.ViewSettings()
+	case HighScoresScreen:
+		return m.HighScores.ViewHighScores()
 	}
 	return "No Screen Selected"
 }

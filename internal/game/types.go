@@ -21,6 +21,8 @@ type PlayerInfo struct {
 	CritChance    int
 	BaseCritMulti int
 	XPGained      int
+	TotalXP       int
+	Kills         int
 }
 
 type SnapShot struct {

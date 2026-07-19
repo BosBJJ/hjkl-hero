@@ -21,6 +21,28 @@ func (m *GameModel) CheckGameState() {
 	}
 }
 
+func GetRunStats(m GameModel) RunStats {
+	return RunStats{
+		Kills:      m.gameState.Stats.Kills,
+		TotalXp:    m.gameState.Stats.TotalXP,
+		TotalMoves: m.TotalMoves,
+		MapLevel:   m.gameState.MapInfo.Level,
+	}
+}
+
+func makeBaseCharacter() game.PlayerInfo {
+	return game.PlayerInfo{
+		MaxHealth:     12,
+		CurrentHealth: 12,
+		BaseDmg:       4,
+		CritChance:    10, //percent, start with 10%
+		BaseCritMulti: 2,
+		XPGained:      0,
+		TotalXP:       0,
+		Kills:         0,
+	}
+}
+
 type EditorMode int
 
 const (

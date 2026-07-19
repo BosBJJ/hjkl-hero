@@ -1,38 +1,17 @@
-- [x] Import map to bubbletea
-- [x] Track cursor location
-- [x] Display cursor
-- [x] Prevent cursor from passing #
-- [x] Clamp cursor position on vertical movement
 - [ ] Add more simple commands
-    - [x] Setup ability to switch modes, Normal/Replace for now
-    - [x] Change commands to utilize mode change 
-    - [x] Model - cmds add new modes to switch
-    - [x] Undo CMD
-        - [x] Make SaveSnapshot func, before making any changes call the func, it will save to mapinfo snapshot []string and gs snap postition
-        - [x] If undo is pressed, simply replace map and position with snapshots
-        - [x] Add ability to do more than single undo 
-        - [x] Redo CMD
     - [ ] Yank
         - [ ] Copy current line? Maybe keep it simple and just have y-y
+    - [ ] b/w
     - [ ] : commands
-        - [x] q!
-        - [x] w/wq, w will check if current map == completed map, if correct will change page to Level Completed Please use :wq, wq verifies and closes the level
         - [ ] help - show all available commands
-- [ ] Add enemies or items in room map types
-    - [x] Enemy that moves when you move, 1-9 moves, moves towards cursor, each move lowers number, 0 = dead
-    - [x] Melee enemy, attacks within 1 tile
-    - [x] Tank enemy, attacks within 1 tile, a lot of health, moves once every X turns
+- [ ] Add items in room map types
     - [ ] health pack/treasures? 
-    - [x] tickMsg, either once every X seconds spawn or chance to spawn, limit to X per map
 - [ ] Use lipgloss to add flavor to the maps/entities 
-    - [ ] Ability for user to choose their background color/cursor color/player color
-    - [x] Cursor in text map is only highlighted
-    - [x] Color only player in room map
-        - [ ] Game map change color based on health?
+    - [ ] Game map change color based on health?
 - [ ] Add more maps
-    - [ ] Procedurally generated, win condition go to ^ and press enter (go up a floor)
-
-
-- [x] Add win condition for rooms
-- [x] Add directional attack
-- [x] Change how player spawns on new map
+    - [ ] Procedurally generated
+- [ ] SQL
+    - [x] When game is over, let player save their current run
+        - [x] Ask for username input
+        - [x] Possibly add timer, moves made, enemies killed, xp gained stats
+    - [ ] Have preset backgrounds or let player choose from select colors, save to DB so game can reload with options
