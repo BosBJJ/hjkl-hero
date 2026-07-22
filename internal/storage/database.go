@@ -58,6 +58,50 @@ func CreateSettingSchema(db *sql.DB) error {
 	game_mode TEXT NOT NULL);
 	`
 	_, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `INSERT OR IGNORE INTO settings (id, theme, game_mode)
+	VALUES (1, 'default', 'tutorial');
+	`
+
+	_, err = db.Exec(query)
+
+	return err
+}
+
+func GetSettings(db *sql.DB) (Settings, error) {
+	query := `SELECT theme, game_mode FROM settings`
+
+	var settings Settings
+	err := db.QueryRow(query).Scan(
+		&settings.Theme, &settings.GameMode)
+
+	if err != nil {
+		return Settings{}, fmt.Errorf("error: %v", err)
+	}
+
+	return settings, nil
+}
+
+func UpdateGameMode(db *sql.DB, mode GameMode) error {
+	_, err := db.Exec(`
+        UPDATE settings
+        SET game_mode = ?
+        WHERE id = 1
+    `, mode)
+
+	return err
+}
+
+func UpdateTheme(db *sql.DB, theme Theme) error {
+	_, err := db.Exec(`
+        UPDATE settings
+        SET theme = ?
+        WHERE id = 1
+    `, theme)
+
 	return err
 }
 

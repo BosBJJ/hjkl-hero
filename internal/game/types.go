@@ -47,3 +47,10 @@ type CombatLog struct {
 	Experience  int
 	AttackStyle AttackType
 }
+
+type Camera struct {
+	X      int
+	Y      int
+	Width  int
+	Height int
+}

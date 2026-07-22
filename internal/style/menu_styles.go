@@ -29,9 +29,9 @@ var MenuBoxStyle = lipgloss.NewStyle().
 
 var HSStyle = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).
-	Background(Green).
+	Background(BlueDark).
 	BorderForeground(BlueDark).
-	Foreground(BlueDark).
+	Foreground(Peach).
 	Bold(true)
 
 var HeaderStyle = lipgloss.NewStyle().

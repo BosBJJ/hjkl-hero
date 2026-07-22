@@ -28,23 +28,38 @@ func doTick() tea.Cmd {
 }
 
 type Model struct {
-	Screen     Screen
-	Menu       MenuModel
-	Game       GameModel
-	GameOver   GameOverModel
-	Settings   SettingsModel
-	HighScores HighScoresModel
-	DB         *sql.DB
+	Screen          Screen
+	Menu            MenuModel
+	Game            GameModel
+	GameOver        GameOverModel
+	Settings        SettingsModel
+	HighScores      HighScoresModel
+	CurrentSettings storage.Settings
+	DB              *sql.DB
+	height          int
+	width           int
 }
 
 func NewModel(db *sql.DB) Model {
+	settings, err := storage.GetSettings(db)
+	if err != nil {
+		panic(err)
+	}
+	var game GameModel
+	switch settings.GameMode {
+	case storage.TutorialMode:
+		game = MakeDefaultGameModel()
+	case storage.RogueLikeMode:
+		game = MakeRogueLikeGameModel()
+	}
 	return Model{
-		Menu:       MakeMenu(),
-		Game:       MakeDefaultGameModel(),
-		GameOver:   MakeGameOver(),
-		Settings:   MakeSettingsModel(),
-		HighScores: MakeHighScores(),
-		DB:         db,
+		Menu:            MakeMenu(),
+		Game:            game,
+		GameOver:        MakeGameOver(),
+		Settings:        MakeSettingsModel(db, settings),
+		HighScores:      MakeHighScores(),
+		CurrentSettings: settings,
+		DB:              db,
 	}
 }
 
@@ -55,6 +70,9 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		m.height = msg.Height
+		m.width = msg.Width
+
 		menu, _ := m.Menu.UpdateMenu(msg)
 		m.Menu = menu
 
@@ -73,7 +91,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tickMsg:
 		if m.Game.gameState.MapInfo.MapType == game.RoomMap {
-			m.Game.gameState.SpawnEnemy()
+			mobCap := m.Game.gameState.MapInfo.Level + 4
+			switch m.CurrentSettings.GameMode {
+			case storage.TutorialMode:
+				m.Game.gameState.SpawnEnemy(2)
+			case storage.RogueLikeMode:
+				m.Game.gameState.SpawnEnemy(mobCap)
+			}
 		}
 		return m, doTick()
 	case tea.KeyMsg:
@@ -87,7 +111,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Menu = menu
 			switch menu.Selected {
 			case 0:
-				m.Game = MakeDefaultGameModel()
+				switch m.CurrentSettings.GameMode {
+				case storage.TutorialMode:
+					m.Game = MakeDefaultGameModel()
+				case storage.RogueLikeMode:
+					m.Game = MakeRogueLikeGameModel()
+				}
+				m.Game.height = m.height
+				m.Game.width = m.width
+				m.Game.camera.Height = 40
+				m.Game.camera.Width = 90
+				m.Game.AdjustCamera()
 				m.Screen = GameScreen
 				m.Menu.Selected = -1
 			case 1:
@@ -121,7 +155,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					TotalXp:    gameOver.Stats.TotalXp,
 					TotalMoves: gameOver.Stats.TotalMoves,
 					MapLevel:   gameOver.Stats.MapLevel,
-					GameMode:   storage.TutorialMode,
+					GameMode:   m.CurrentSettings.GameMode,
 				})
 				hs, _ := storage.ShowScores(m.DB)
 				m.HighScores.Scores = hs
@@ -140,6 +174,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Screen = MainMenuScreen
 				m.Settings.Selected = -1
 			}
+			m.CurrentSettings.GameMode = m.Settings.ModeSelected
 			return m, cmd
 		case HighScoresScreen:
 			hs, cmd := m.HighScores.UpdateHighScores(msg)

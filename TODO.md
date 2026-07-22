@@ -15,3 +15,10 @@
         - [x] Ask for username input
         - [x] Possibly add timer, moves made, enemies killed, xp gained stats
     - [ ] Have preset backgrounds or let player choose from select colors, save to DB so game can reload with options
+
+
+- [x] Make rooms connect
+- [x] Fix rendering
+    - [x] Make camera center player better
+- [x] Un hardcode start rogue mode and save by default tutorial mode
+- [ ] Figure out how to nicely display game, make it a proper square with Stats above and an optional command to display debug

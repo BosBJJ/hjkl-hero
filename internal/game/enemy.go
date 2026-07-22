@@ -23,7 +23,7 @@ func (e EnemyType) String() string {
 	}
 }
 
-func (gs *GameState) SpawnEnemy() {
+func (gs *GameState) SpawnEnemy(maxEnemies int) {
 	height, width := GetMapSize(*gs)
 	var newSpawn EnemyInfo
 	for {
@@ -47,7 +47,7 @@ func (gs *GameState) SpawnEnemy() {
 		default:
 			newSpawn = MakeMeleer(line, col)
 		}
-		if len(gs.Enemies) < 5 {
+		if len(gs.Enemies) < maxEnemies {
 			gs.Enemies = append(gs.Enemies, newSpawn)
 		}
 		return
@@ -83,6 +83,7 @@ func MakeMeleer(line, col int) EnemyInfo {
 	return newMob
 }
 
+//Zanth is a friend who loves playing tank, so this is a mob dedicated to him
 func MakeTank(line, col int) EnemyInfo {
 	var newMob EnemyInfo
 	newMob.Health = 40

@@ -18,6 +18,7 @@ var (
 	Blue      = lipgloss.Color("#6b8ab8")
 	BlueLight = lipgloss.Color("#97c7e9")
 	BlueDark  = lipgloss.Color("#3c5ea9")
+	BabyBlue  = lipgloss.Color("87")
 
 	Red   = lipgloss.Color("#e04a5f")
 	Green = lipgloss.Color("#55ba30")
@@ -31,4 +32,3 @@ var (
 
 	Black = lipgloss.Color("#272822")
 )
-

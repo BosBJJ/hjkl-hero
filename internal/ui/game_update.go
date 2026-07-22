@@ -23,6 +23,7 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.AdjustCamera()
 	}
 	return m, nil
 }
@@ -38,6 +39,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				gs.Player.Move(direction, *gs)
 			})
+			m.AdjustCamera()
 			m.TotalMoves += 1
 			m.CmdCount = 0
 			m.GameMessage = ""

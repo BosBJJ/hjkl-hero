@@ -49,7 +49,7 @@ func (gs GameState) GetTile(line, col int) rune {
 }
 
 func ToLines(gs GameState) []string {
-	return strings.Split(string(gs.MapInfo.LevelMap), "\n")
+	return strings.Split(strings.TrimRight(string(gs.MapInfo.LevelMap), "\n"), "\n")
 }
 
 func ToText(lines []string) string {

@@ -24,7 +24,7 @@ func MakeHighScores() HighScoresModel {
 	return HighScoresModel{
 		Options:  []string{"Return To Main Menu"},
 		Selected: -1,
-		Page: 1,
+		Page:     1,
 	}
 }
 
@@ -49,7 +49,7 @@ func (m HighScoresModel) UpdateHighScores(msg tea.Msg) (HighScoresModel, tea.Cmd
 				m.Page--
 			}
 		case "l":
-			if m.Offset < len(m.Scores)-1 {
+			if m.Offset+5 <= len(m.Scores)-1 {
 				m.Offset += 5
 				m.Page++
 			}

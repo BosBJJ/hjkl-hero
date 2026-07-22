@@ -17,7 +17,11 @@ func main() {
 
 	err = storage.CreateHSSchema(db)
 	if err != nil {
-		log.Fatalf("unable to create database: %v", err)
+		log.Fatalf("unable to create high scores schema: %v", err)
+	}
+	err = storage.CreateSettingSchema(db)
+	if err != nil {
+		log.Fatalf("unable to create settings schema: %v", err)
 	}
 
 	p := tea.NewProgram(ui.NewModel(db), tea.WithAltScreen())
