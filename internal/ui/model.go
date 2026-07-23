@@ -119,8 +119,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.Game.height = m.height
 				m.Game.width = m.width
-				m.Game.camera.Height = 40
-				m.Game.camera.Width = 90
+				m.Game.camera.Height = m.height - 4
+				m.Game.camera.Width = m.width - 40 - 40
 				m.Game.AdjustCamera()
 				m.Screen = GameScreen
 				m.Menu.Selected = -1

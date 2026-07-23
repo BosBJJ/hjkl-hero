@@ -31,4 +31,5 @@ var (
 	GrayDarker = lipgloss.Color("#35384a")
 
 	Black = lipgloss.Color("#272822")
+	Brown = lipgloss.Color("#2B2621")
 )

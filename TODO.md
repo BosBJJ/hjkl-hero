@@ -9,7 +9,7 @@
 - [ ] Use lipgloss to add flavor to the maps/entities 
     - [ ] Game map change color based on health?
 - [ ] Add more maps
-    - [ ] Procedurally generated
+    - [x] Procedurally generated
 - [ ] SQL
     - [x] When game is over, let player save their current run
         - [x] Ask for username input

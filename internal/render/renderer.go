@@ -10,9 +10,10 @@ import (
 
 // Has to be outside of the func so it doesn't call style.X.Render 60 thousand times and lag the game
 var (
-	wallStyle  = style.WallStyle.Render("#")
-	floorStyle = style.FloorStyle.Render(".")
-	stairStyle = style.StairStyle.Render("^")
+	playerStyle = style.PlayerStyle.Render("@")
+	wallStyle   = style.WallStyle.Render("\u2593") // #, \u2588, \u2593, \u2592
+	floorStyle  = style.FloorStyle.Render(".")     //"." or " "
+	stairStyle  = style.StairStyle.Render("^")
 )
 
 // Renders whats within cameras view
@@ -34,11 +35,6 @@ func Render(gs game.GameState, cam game.Camera) string {
 	if bottom > len(RuneMap) {
 		bottom = len(RuneMap)
 	}
-
-	//	if right > len(RuneMap[0]) {
-	//		right = len(RuneMap[0])
-	//	}
-
 	if top < 0 {
 		top = 0
 	}
@@ -61,7 +57,7 @@ func Render(gs game.GameState, cam game.Camera) string {
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(style.CursorStyle.Render(string(rune)))
 				} else {
-					rendered.WriteString(style.PlayerStyle.Render(string('@')))
+					rendered.WriteString(playerStyle)
 				}
 			case isEnemy:
 				if enemy.EnemyType == game.Chaser {
@@ -74,7 +70,11 @@ func Render(gs game.GameState, cam game.Camera) string {
 					rendered.WriteString(style.ZanthStyle.Render("Z"))
 				}
 			case rune == '.':
-				rendered.WriteString(floorStyle)
+				if gs.MapInfo.MapType == game.EditorMap {
+					rendered.WriteString(string(rune))
+				} else {
+					rendered.WriteString(floorStyle)
+				}
 			case rune == '^':
 				rendered.WriteString(stairStyle)
 			default:

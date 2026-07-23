@@ -21,15 +21,16 @@ func (m *GameModel) LevelUp() {
 		width = 80
 		rooms = 15
 		for range m.gameState.MapInfo.Level {
-			height += 20
+			height += 10
 			width += 20
-			rooms += 1
+			rooms += 2
 		}
 		m.gameState.MapInfo.LevelMap = levels.MakeMap(height, width, rooms)
 		m.gameState.MapInfo.MapType = game.RoomMap
 	}
 	m.gameState.Enemies = nil
 	m.gameState.Player = m.gameState.SpawnPlayer()
+	m.AdjustCamera()
 }
 
 func (m *GameModel) AdjustCamera() {

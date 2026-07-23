@@ -67,16 +67,22 @@ type RunStats struct {
 }
 
 func (m GameModel) ViewGame() string {
+	height, width := game.GetMapSize(m.gameState)
+	termInfo := fmt.Sprintf(
+		"Terminal: %dx%d\nCamera: %dx%d\nMap: %dx%d",
+		m.width, m.height,
+		m.camera.Width, m.camera.Height,
+		height, width,
+	)
 	currentMap := render.Render(m.gameState, m.camera)
-	info := []string{}
-	//	debugInfo := fmt.Sprintf("Current Terminal Size -- Width: %v   Height: %v\nPlayer Position --- %v %v\nGame Type: %v\nEnemies: %v\n",
-	//		m.width, m.height, m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies))
-		combatMessages := fmt.Sprintf("Combat Message: %v\n%v", m.GameMessage, m.EnemyMsg)
-		info = append(info, combatMessages)
-		characterInfo := fmt.Sprintf("Current Health: %v\nMax Health: %v\nXP %v/10\n%v\nTotalXP:%v", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth, m.gameState.Stats.XPGained, m.LevelMsg, m.gameState.Stats.TotalXP)
-		info = append(info, characterInfo)
-	//	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
-	//	return fmt.Sprintf("%v\n\n%v\n\n%v\n%v\n\n%v", characterInfo, currentMap, combatMessages, editorInfo, debugInfo)
-//	game := lipgloss.JoinVertical(lipgloss.Center, append([]string{currentMap}, info...)...)
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Top, "\n\n\n\n"+currentMap)
+	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
+	characterInfo := fmt.Sprintf("Current Health: %v/%v \nXP %v/10 \n\n%v", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth, m.gameState.Stats.XPGained, m.LevelMsg)
+	combatMessages := fmt.Sprintf("Game Message: %v\n\n%v", m.GameMessage, m.EnemyMsg)
+	gameDebugInfo := fmt.Sprintf("Player Position --- %v %v\nGame Type: %v\nEnemies: %v\n \n%v",
+		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), termInfo)
+	leftBar := lipgloss.NewStyle().Width(50).Render(lipgloss.JoinVertical(lipgloss.Left, characterInfo, combatMessages))
+	center := lipgloss.JoinVertical(lipgloss.Left, currentMap, editorInfo)
+	rightBar := lipgloss.JoinVertical(lipgloss.Center, gameDebugInfo)
+	return lipgloss.JoinHorizontal(lipgloss.Center, leftBar, center, rightBar)
+
 }

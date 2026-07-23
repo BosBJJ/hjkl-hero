@@ -92,9 +92,9 @@ func MakeRoom(tileMap [][]rune) Room {
 	roomWidth := rand.Intn(maxSize-minSize+1) + minSize
 	lines := len(tileMap)
 	columns := len(tileMap[0])
-	Y1 := rand.Intn(lines-roomHeight) + 1
+	Y1 := rand.Intn(lines-roomHeight-1) + 1
 	Y2 := Y1 + roomHeight
-	X1 := rand.Intn(columns-roomWidth) + 1
+	X1 := rand.Intn(columns-roomWidth-1) + 1
 	X2 := X1 + roomWidth
 	return Room{
 		Y1: Y1,
@@ -138,6 +138,7 @@ func MakeRooms(count int, tileMap [][]rune) []Room {
 	return rooms
 }
 
+// Uses "Drunkards walk", carves out one tile, then either continues towards target or stumbles into a random direction
 func ConnectRooms(r1, r2 Room, tileMap [][]rune) {
 	wX := (r1.X1 + r1.X2) / 2
 	wY := (r1.Y1 + r1.Y2) / 2
@@ -146,13 +147,13 @@ func ConnectRooms(r1, r2 Room, tileMap [][]rune) {
 	for wX != targetX || wY != targetY {
 		roll := rand.Intn(101)
 		switch {
-		case roll >= 70:
+		case roll >= 80:
 			if wX < targetX {
 				wX++
 			} else if wX > targetX {
 				wX--
 			}
-		case roll >= 30:
+		case roll >= 40:
 			if wY < targetY {
 				wY++
 			} else if wY > targetY {
@@ -162,13 +163,21 @@ func ConnectRooms(r1, r2 Room, tileMap [][]rune) {
 			dir := rand.Intn(4)
 			switch dir {
 			case 0:
-				wX++
+				if wX < len(tileMap[0])-1 {
+					wX++
+				}
 			case 1:
-				wX--
+				if wX > 0 {
+					wX--
+				}
 			case 2:
-				wY++
+				if wY < len(tileMap)-1 {
+					wY++
+				}
 			case 3:
-				wY--
+				if wY > 0 {
+					wY--
+				}
 			}
 		}
 		tileMap[wY][wX] = '.'
