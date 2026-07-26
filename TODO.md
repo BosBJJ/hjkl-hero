@@ -1,24 +1,15 @@
 - [ ] Add more simple commands
+    - [x] b/w/e
     - [ ] Yank
         - [ ] Copy current line? Maybe keep it simple and just have y-y
-    - [ ] b/w
-    - [ ] : commands
-        - [ ] help - show all available commands
 - [ ] Add items in room map types
     - [ ] health pack/treasures? 
-- [ ] Use lipgloss to add flavor to the maps/entities 
-    - [ ] Game map change color based on health?
 - [ ] Add more maps
-    - [x] Procedurally generated
+    - [ ] First map get to * using HJKL, use replace, learn how to use :w and :wq
+    - [ ] Second map using numbers, jump down X lines, use X to delete
+    - [ ] Third map using b/w/e
+    - [ ] Fourth map yank/paste/delete lines and undo/redo
+    - [ ] Fifth map edit the text
 - [ ] SQL
-    - [x] When game is over, let player save their current run
-        - [x] Ask for username input
-        - [x] Possibly add timer, moves made, enemies killed, xp gained stats
-    - [ ] Have preset backgrounds or let player choose from select colors, save to DB so game can reload with options
+    - [ ] Have theme menu show what live game looks like, let player pick a theme or customize wall color/style, floor color/style, player color
 
-
-- [x] Make rooms connect
-- [x] Fix rendering
-    - [x] Make camera center player better
-- [x] Un hardcode start rogue mode and save by default tutorial mode
-- [ ] Figure out how to nicely display game, make it a proper square with Stats above and an optional command to display debug

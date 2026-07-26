@@ -32,7 +32,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "1", "2", "3", "4", "5", "6", "7", "8", "9", "0":
+		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
 			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
 		case "h", "j", "k", "l":
 			direction := msg.String()
@@ -48,6 +48,26 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.GameMessage = "You have reached the stairs! Press SPACE to go to next floor!"
 			}
+		case "w":
+			m.gameState.JumpToNext()
+		case "W":
+			m.gameState.JumpToNextWord()
+		case "b":
+			m.gameState.JumpToPrev()
+		case "B":
+			m.gameState.JumpToPrevWord()
+		case "e":
+			m.gameState.JumpToEndOrPunct()
+		case "E":
+			m.gameState.JumpToEnd()
+		case "0":
+			if m.CmdCount > 0 {
+				m.CmdCount = m.CmdCount * 10
+			} else {
+				m.gameState.JumpToStart()
+			}
+		case "$":
+			m.gameState.JumpToLast()
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				if gs.MapInfo.MapType == game.EditorMap {
@@ -168,6 +188,8 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 		return m, nil
 	case "enter":
 		switch m.CmdText {
+		case "q":
+			m.GameOver = true
 		case "q!":
 			return m, tea.Quit
 		case "w":
@@ -194,6 +216,14 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.LevelUp()
 			m.CheckGameState()
 			return m, nil
+		case "help":
+			m.HelpMenu = !m.HelpMenu
+			m.CmdText = ""
+			m.EditorMode = NormalMode
+		case "debug":
+			m.DebugMenu = !m.DebugMenu
+			m.CmdText = ""
+			m.EditorMode = NormalMode
 		default:
 			m.CmdText = ""
 			m.EditorMode = NormalMode

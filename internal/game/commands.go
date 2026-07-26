@@ -161,3 +161,204 @@ func (gs *GameState) Redo() {
 func (gs *GameState) MapComplete() bool {
 	return gs.MapInfo.LevelMap == gs.MapInfo.AnswerMap
 }
+
+// Only jumps to next word after a space
+func (gs *GameState) JumpToNextWord() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	leftWord := false
+	for line := gs.Player.Line; line < len(lines); line++ {
+		runes := []rune(lines[line])
+		for i := col; i < len(runes); i++ {
+			currRune := runes[i]
+			switch {
+			case !leftWord && isSpaceOrSymbol(currRune):
+				leftWord = true
+			case leftWord && !isSpaceOrSymbol(currRune):
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+		}
+		leftWord = true
+		col = 0
+	}
+}
+
+// Jumps to either next new word OR punctuation
+func (gs *GameState) JumpToNext() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	for line := gs.Player.Line; line < len(lines); line++ {
+		runes := []rune(lines[line])
+		for i := col + 1; i < len(runes); i++ {
+			currRune := runes[i-1]
+			nextRune := runes[i]
+			if !isSpaceOrSymbol(currRune) && isSymbol(nextRune) {
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+			if isSpaceOrSymbol(currRune) && !isSpaceOrSymbol(nextRune) {
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+		}
+		col = 0
+	}
+}
+//Jumps to first index of line (shuffled to 1 because hardcoded maps start at index 1, normally is index 0)
+func (gs *GameState) JumpToStart() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	gs.Player.Column = 1
+}
+//Jumps to last index of line
+func (gs *GameState) JumpToLast() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	gs.Player.Column = len([]rune(lines[gs.Player.Line])) - 1
+}
+//Jumps to end of next word
+func (gs *GameState) JumpToEnd() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	for line := gs.Player.Line; line < len(lines); line++ {
+		runes := []rune(lines[line])
+		leftWord := runes[col] != ' '
+		if leftWord && (col == len(runes)-1 || runes[col+1] == ' ') {
+			leftWord = false
+		}
+		for i := col + 1; i < len(runes); i++ {
+			currRune := runes[i-1]
+			nextRune := runes[i]
+			switch {
+			case i == len(runes)-1:
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			case !leftWord && nextRune == ' ' && currRune != ' ':
+				leftWord = true
+			case !leftWord && currRune == ' ':
+				leftWord = true
+			case leftWord && nextRune == ' ':
+				gs.Player.Column = i - 1
+				gs.Player.Line = line
+				return
+			}
+		}
+		leftWord = true
+		col = 1
+	}
+}
+// Jumps to end of word or next punct
+func (gs *GameState) JumpToEndOrPunct() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	for line := gs.Player.Line; line < len(lines); line++ {
+		runes := []rune(lines[line])
+		leftWord := runes[col] != ' '
+		if leftWord && (col == len(runes)-1 || isSpaceOrSymbol(runes[col+1])) {
+			leftWord = false
+		}
+		for i := col + 1; i < len(runes); i++ {
+			currRune := runes[i-1]
+			nextRune := runes[i]
+			switch {
+			case !leftWord && nextRune == ' ' && currRune != ' ':
+				leftWord = true
+			case !leftWord && currRune == ' ':
+				leftWord = true
+			case leftWord && nextRune == ' ':
+				gs.Player.Column = i - 1
+				gs.Player.Line = line
+				return
+			case leftWord && isSymbol(nextRune):
+				gs.Player.Column = i - 1
+				gs.Player.Line = line
+				return
+			case isSymbol(nextRune):
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			case i == len(runes)-1:
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+		}
+		leftWord = true
+		col = 1
+	}
+}
+// Jumps to last beginning of word or punctuation
+func (gs *GameState) JumpToPrev() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	for line := gs.Player.Line; line >= 0; line-- {
+		runes := []rune(lines[line])
+		for i := col - 1; i >= 0; i-- {
+			if isSymbol(runes[i]) {
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+			if (i == 0 || isSpaceOrSymbol(runes[i-1])) && !isSpaceOrSymbol(runes[i]) {
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+		}
+		if line > 0 {
+			col = len([]rune(lines[line-1]))
+		}
+	}
+}
+//Jump to last word
+func (gs *GameState) JumpToPrevWord() {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	for line := gs.Player.Line; line >= 0; line-- {
+		runes := []rune(lines[line])
+		for i := col - 1; i >= 0; i-- {
+			if (i == 0 || isSpaceOrSymbol(runes[i-1])) && !isSpaceOrSymbol(runes[i]) {
+				gs.Player.Column = i
+				gs.Player.Line = line
+				return
+			}
+		}
+		if line > 0 {
+			col = len([]rune(lines[line-1]))
+		}
+	}
+}
+
+func isSpaceOrSymbol(r rune) bool {
+	return r == ' ' || isSymbol(r)
+}
+
+func isSymbol(r rune) bool {
+	return r == '.' || r == ',' || r == '?' || r == '!' || r == ';'
+}
