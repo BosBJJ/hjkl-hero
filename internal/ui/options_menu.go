@@ -1,25 +1,25 @@
 package ui
 
 import (
-	"fmt"
-
 	"database/sql"
+
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	"github.com/BosBJJ/hjkl-hero/internal/style"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type SettingsModel struct {
-	width        int
-	height       int
-	Cursor       int
-	Options      []string
-	Selected     int
-	ModeMenu     bool
-	OptionsMode  OptionsMode
-	ModeSelected storage.GameMode
-	DB           *sql.DB
+	width         int
+	height        int
+	Cursor        int
+	Options       []string
+	Selected      int
+	ModeMenu      bool
+	OptionsMode   OptionsMode
+	ModeSelected  storage.GameMode
+	ThemeSelected storage.ThemeID
+	DB            *sql.DB
+	EditorMenu    editorMenu
 }
 
 type OptionsMode int
@@ -28,14 +28,22 @@ const (
 	OptionMenuMode OptionsMode = iota
 	GameTypePickerMode
 	StylePickerMode
+
+	StyleEditorMode
 )
 
 func MakeSettingsModel(db *sql.DB, settings storage.Settings) SettingsModel {
+	editorMenu := editorMenu{
+		LeftPanel: true,
+		Theme:     style.Themes[storage.CustomTheme],
+	}
 	return SettingsModel{
-		DB:           db,
-		Options:      []string{"Mode Type", "Cursor Style", "Exit"},
-		Selected:     -1,
-		ModeSelected: settings.GameMode,
+		DB:            db,
+		Options:       []string{"Mode Type", "Theme Picker", "Exit"},
+		Selected:      -1,
+		ModeSelected:  settings.GameMode,
+		ThemeSelected: settings.ThemeID,
+		EditorMenu:    editorMenu,
 	}
 }
 
@@ -45,9 +53,14 @@ func (m SettingsModel) UpdateSettings(msg tea.Msg) (SettingsModel, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 	case tea.KeyMsg:
+		switch m.OptionsMode {
+		case StyleEditorMode:
+			m.updateThemeEditor(msg)
+			return m, nil
+		}
 		switch msg.String() {
 		case "j":
-			if m.Cursor < len(m.Options)-1 {
+			if m.Cursor < m.currentOptionsCount()-1 {
 				m.Cursor++
 			}
 		case "k":
@@ -63,27 +76,14 @@ func (m SettingsModel) UpdateSettings(msg tea.Msg) (SettingsModel, tea.Cmd) {
 				}
 				if m.Cursor == 1 {
 					m.OptionsMode = StylePickerMode
+					m.Cursor = 0
 					return m, nil
 				}
 				m.Selected = m.Cursor
 			case GameTypePickerMode:
-				if m.Cursor == 0 {
-					m.ModeSelected = storage.TutorialMode
-					storage.UpdateGameMode(m.DB, storage.TutorialMode)
-				}
-				if m.Cursor == 1 {
-					m.ModeSelected = storage.RogueLikeMode
-					storage.UpdateGameMode(m.DB, storage.RogueLikeMode)
-				}
-				if m.Cursor == 2 {
-					m.OptionsMode = OptionMenuMode
-					m.Cursor = 0
-				}
+				m.updateGamePicker()
 			case StylePickerMode:
-				if m.Cursor == 2 {
-					m.OptionsMode = OptionMenuMode
-					m.Cursor = 0
-				}
+				m.updateThemePicker()
 			}
 		}
 	}
@@ -91,62 +91,16 @@ func (m SettingsModel) UpdateSettings(msg tea.Msg) (SettingsModel, tea.Cmd) {
 }
 
 func (m SettingsModel) ViewSettings() string {
-	const Title = `
- ██████╗ ██████╗ ████████╗██╗ ██████╗ ███╗   ██╗███████╗
-██╔═══██╗██╔══██╗╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
-██║   ██║██████╔╝   ██║   ██║██║   ██║██╔██╗ ██║███████╗
-██║   ██║██╔═══╝    ██║   ██║██║   ██║██║╚██╗██║╚════██║
-╚██████╔╝██║        ██║   ██║╚██████╔╝██║ ╚████║███████║
- ╚═════╝ ╚═╝        ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
-                                                        `
-	title := style.MenuTitleStyle.
-		Width(m.width).
-		Align(lipgloss.Center).
-		Render(Title) + "\n"
-
-	optionBoxes := []string{}
+	view := ""
 	switch m.OptionsMode {
 	case OptionMenuMode:
-		for i, option := range m.Options {
-			if m.Cursor == i {
-				optionBoxes = append(optionBoxes, style.CurrentOptionStyle.
-					Align(lipgloss.Center).
-					AlignVertical(lipgloss.Center).
-					Width(80).
-					Height(3).
-					Render(option)+"\n")
-			} else {
-				optionBoxes = append(optionBoxes, style.OptionsStyle.
-					Align(lipgloss.Center).
-					AlignVertical(lipgloss.Center).
-					Width(80).
-					Height(3).
-					Render(option)+"\n")
-			}
-		}
+		view = m.getOptionsMenu()
 	case GameTypePickerMode:
-		options := []string{"Tutorial", "Rogue", "Back"}
-		for i, option := range options {
-			if m.Cursor == i {
-				optionBoxes = append(optionBoxes, style.CurrentOptionStyle.
-					Align(lipgloss.Center).
-					AlignVertical(lipgloss.Center).
-					Width(80).
-					Height(3).
-					Render(option)+"\n")
-			} else {
-				optionBoxes = append(optionBoxes, style.OptionsStyle.
-					Align(lipgloss.Center).
-					AlignVertical(lipgloss.Center).
-					Width(80).
-					Height(3).
-					Render(option)+"\n")
-			}
-		}
+		view = m.getGamePickerMenu()
+	case StylePickerMode:
+		view = m.getStylePickerMenu()
+	case StyleEditorMode:
+		view = m.getCustomThemeEditor()
 	}
-	currMode := fmt.Sprintf("Currently Selected Game Mode: %v", m.ModeSelected)
-	optionBoxes = append(optionBoxes, currMode)
-	menu := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
-
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Top, "\n\n\n\n"+menu)
+	return view
 }

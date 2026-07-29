@@ -5,23 +5,17 @@ import (
 	"strings"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
+	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	"github.com/BosBJJ/hjkl-hero/internal/style"
 )
 
-// Has to be outside of the func so it doesn't call style.X.Render 60 thousand times and lag the game
-var (
-	playerStyle = style.PlayerStyle.Render("@")
-	wallStyle   = style.WallStyle.Render("\u2593") // #, \u2588, \u2593, \u2592
-	floorStyle  = style.FloorStyle.Render(".")     //"." or " "
-	stairStyle  = style.StairStyle.Render("^")
-)
-
 // Renders whats within cameras view
-func Render(gs game.GameState, cam game.Camera) string {
+func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string {
+	theme := style.MakeStyle(themeID)
 	lines := game.ToLines(gs)
-	playerX := gs.Player.Line
-	playerY := gs.Player.Column
-	if playerX < 0 || playerX >= len(lines) {
+	playerY := gs.Player.Line
+	playerX := gs.Player.Column
+	if playerY < 0 || playerY >= len(lines) {
 		return string(gs.MapInfo.LevelMap)
 	}
 	top := cam.Y
@@ -53,11 +47,11 @@ func Render(gs game.GameState, cam game.Camera) string {
 			rune := RuneMap[y][x]
 			enemy, isEnemy := gs.EnemyAt(y, x)
 			switch {
-			case y == playerX && x == playerY:
+			case y == playerY && x == playerX:
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(style.CursorStyle.Render(string(rune)))
 				} else {
-					rendered.WriteString(playerStyle)
+					rendered.WriteString(theme.PlayerStyle)
 				}
 			case isEnemy:
 				if enemy.EnemyType == game.Chaser {
@@ -73,15 +67,15 @@ func Render(gs game.GameState, cam game.Camera) string {
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(string(rune))
 				} else {
-					rendered.WriteString(floorStyle)
+					rendered.WriteString(theme.FloorStyle)
 				}
 			case rune == '^':
-				rendered.WriteString(stairStyle)
+				rendered.WriteString(style.StairStyle.Render("^"))
 			default:
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(string(rune))
 				} else {
-					rendered.WriteString(wallStyle)
+					rendered.WriteString(theme.WallStyle)
 				}
 			}
 		}

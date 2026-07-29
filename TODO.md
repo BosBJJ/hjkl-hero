@@ -10,6 +10,6 @@
     - [ ] Third map using b/w/e
     - [ ] Fourth map yank/paste/delete lines and undo/redo
     - [ ] Fifth map edit the text
-- [ ] SQL
-    - [ ] Have theme menu show what live game looks like, let player pick a theme or customize wall color/style, floor color/style, player color
+- [x] SQL
+    - [x] Have theme menu show what live game looks like, let player pick a theme or customize wall color/style, floor color/style, player color
 

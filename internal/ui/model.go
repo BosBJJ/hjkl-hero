@@ -52,6 +52,7 @@ func NewModel(db *sql.DB) Model {
 	case storage.RogueLikeMode:
 		game = MakeRogueLikeGameModel()
 	}
+	game.SelectedTheme = settings.ThemeID
 	return Model{
 		Menu:            MakeMenu(),
 		Game:            game,
@@ -114,13 +115,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch m.CurrentSettings.GameMode {
 				case storage.TutorialMode:
 					m.Game = MakeDefaultGameModel()
+					m.Game.SelectedTheme = m.Settings.ThemeSelected
 				case storage.RogueLikeMode:
 					m.Game = MakeRogueLikeGameModel()
+					m.Game.SelectedTheme = m.Settings.ThemeSelected
 				}
 				m.Game.height = m.height
 				m.Game.width = m.width
 				m.Game.camera.Height = m.height - 4
-				m.Game.camera.Width = m.width - 40 - 40
+				sides := int(float64(m.width) * 0.20)
+				m.Game.camera.Width = m.width - sides - sides
 				m.Game.AdjustCamera()
 				m.Screen = GameScreen
 				m.Menu.Selected = -1
@@ -175,6 +179,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Settings.Selected = -1
 			}
 			m.CurrentSettings.GameMode = m.Settings.ModeSelected
+			m.Game.SelectedTheme = m.Settings.ThemeSelected
 			return m, cmd
 		case HighScoresScreen:
 			hs, cmd := m.HighScores.UpdateHighScores(msg)

@@ -20,7 +20,7 @@ type Run struct {
 }
 
 type Settings struct {
-	Theme    Theme
+	ThemeID  ThemeID
 	GameMode GameMode
 }
 
@@ -71,12 +71,36 @@ func CreateSettingSchema(db *sql.DB) error {
 	return err
 }
 
+func CreateCustomTheme(db *sql.DB) error {
+	query := `CREATE TABLE IF NOT EXISTS custom_theme(
+	id INTEGER PRIMARY KEY CHECK (id = 1),
+	wall_color TEXT NOT NULL,
+	floor_color TEXT NOT NULL,
+	player_color TEXT NOT NULL,
+	wall_icon TEXT NOT NULL,
+	floor_icon TEXT NOT NULL,
+	player_icon TEXT NOT NULL);
+	`
+	_, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `INSERT OR IGNORE INTO custom_theme (id, wall_color, floor_color, player_color, wall_icon, floor_icon, player_icon)
+	VALUES (?,?,?,?,?,?,?);
+	`
+
+	_, err = db.Exec(query, 1, "magenta", "green", "red", "#", ".", "#")
+
+	return err
+}
+
 func GetSettings(db *sql.DB) (Settings, error) {
 	query := `SELECT theme, game_mode FROM settings`
 
 	var settings Settings
 	err := db.QueryRow(query).Scan(
-		&settings.Theme, &settings.GameMode)
+		&settings.ThemeID, &settings.GameMode)
 
 	if err != nil {
 		return Settings{}, fmt.Errorf("error: %v", err)
@@ -95,7 +119,7 @@ func UpdateGameMode(db *sql.DB, mode GameMode) error {
 	return err
 }
 
-func UpdateTheme(db *sql.DB, theme Theme) error {
+func UpdateTheme(db *sql.DB, theme ThemeID) error {
 	_, err := db.Exec(`
         UPDATE settings
         SET theme = ?
@@ -103,6 +127,36 @@ func UpdateTheme(db *sql.DB, theme Theme) error {
     `, theme)
 
 	return err
+}
+
+func SaveCustomTheme(db *sql.DB, theme Theme) error {
+	_, err := db.Exec(`
+        UPDATE custom_theme
+		SET
+			wall_color = ?,
+			floor_color = ?,
+			player_color = ?,
+			wall_icon = ?,
+			floor_icon = ?,
+			player_icon = ?
+        WHERE id = 1
+    `, theme.WallColor, theme.FloorColor, theme.PlayerColor, theme.WallIcon, theme.FloorIcon, theme.PlayerIcon)
+	return err
+}
+
+func LoadCustomTheme(db *sql.DB) (Theme, error) {
+	query := `SELECT wall_color, floor_color, player_color, wall_icon, floor_icon, player_icon FROM custom_theme
+	WHERE id = 1`
+
+	var theme Theme
+	err := db.QueryRow(query).Scan(
+		&theme.WallColor, &theme.FloorColor, &theme.PlayerColor, &theme.WallIcon, &theme.FloorIcon, &theme.PlayerIcon)
+
+	if err != nil {
+		return Theme{}, fmt.Errorf("error: %v", err)
+	}
+
+	return theme, nil
 }
 
 func SaveRun(db *sql.DB, run Run) error {

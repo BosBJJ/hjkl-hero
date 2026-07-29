@@ -3,8 +3,9 @@ package style
 import "github.com/charmbracelet/lipgloss"
 
 var CursorStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("16")).
-	Background(BabyBlue)
+	Foreground(Black).
+	Background(BabyBlue).
+	Bold(true)
 
 var PlayerStyle = lipgloss.NewStyle().
 	Foreground(Red)
@@ -13,7 +14,7 @@ var ChaserStyle = lipgloss.NewStyle().
 	Background(BabyBlue).
 	Foreground(Black)
 
-var MeleerStyle = lipgloss.NewStyle(). //Filler style for now
+var MeleerStyle = lipgloss.NewStyle().
 	Background(Red).
 	Foreground(Peach)
 
@@ -28,4 +29,12 @@ var FloorStyle = lipgloss.NewStyle().
 	Foreground(Black) // I like Green here
 
 var StairStyle = lipgloss.NewStyle().
-	Background(Brown)
+	Background(Brown).
+	Foreground(Peach)
+
+var StatsStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	Background(Green).
+	BorderForeground(Magenta).
+	Foreground(Magenta).
+	Bold(true)

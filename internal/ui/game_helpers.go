@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/BosBJJ/hjkl-hero/internal/game"
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
@@ -104,4 +106,27 @@ func (m EditorMode) String() string {
 	default:
 		return "InvalidMode"
 	}
+}
+
+func GetHelpMenu() string {
+	sections := []string{
+		"Movement",
+		"  H J K L - Move",
+
+		"Normal Mode",
+		"  X - Delete / Melee Attack",
+		"  R - Replace / Level Up",
+		"  D - Delete Mode / Ranged Attack",
+
+		"Commands",
+		"  :q - End current game",
+		"  :q! - Quit without saving",
+		"  :w - Check level completion",
+		"  :wq - Complete level and continue",
+		"  :help - Display help menu",
+		"  :debug - Display debug info",
+	}
+
+	return strings.Join(sections, "\n")
+
 }

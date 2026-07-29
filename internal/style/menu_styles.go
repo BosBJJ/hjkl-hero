@@ -40,3 +40,17 @@ var HeaderStyle = lipgloss.NewStyle().
 	BorderForeground(Black).
 	Foreground(Black).
 	Bold(true)
+
+var EditorItemStyle = lipgloss.NewStyle().
+	PaddingLeft(1)
+
+var EditorSelectedStyle = lipgloss.NewStyle().
+	PaddingLeft(1).
+	Foreground(Black).
+	Background(BlueLight).
+	Bold(true)
+
+var EditorPanelStyle = lipgloss.NewStyle().
+	Border(lipgloss.NormalBorder()).
+	BorderForeground(GrayDark).
+	Padding(0, 1)
