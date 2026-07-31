@@ -7,9 +7,6 @@ var CursorStyle = lipgloss.NewStyle().
 	Background(BabyBlue).
 	Bold(true)
 
-var PlayerStyle = lipgloss.NewStyle().
-	Foreground(Red)
-
 var ChaserStyle = lipgloss.NewStyle().
 	Background(BabyBlue).
 	Foreground(Black)
@@ -26,15 +23,9 @@ var PotionStyle = lipgloss.NewStyle().
 	Foreground(RedDark).
 	Background(Yellow)
 
-var WallStyle = lipgloss.NewStyle().
-	Foreground(GrayDark) // I like Magenta here
-
-var FloorStyle = lipgloss.NewStyle().
-	Foreground(Black) // I like Green here
-
 var StairStyle = lipgloss.NewStyle().
-	Background(Brown).
-	Foreground(Peach)
+	Background(White).
+	Foreground(Brown)
 
 var StatsStyle = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).

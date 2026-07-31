@@ -56,6 +56,11 @@ func (m *GameModel) AdjustCamera() {
 }
 
 func (m *GameModel) CheckGameState() {
+	if m.GameType == storage.TutorialMode {
+		if m.gameState.MapInfo.Level == 9 {
+			m.GameOver = true
+		}
+	}
 	if m.gameState.MapInfo.Level > 15 {
 		m.GameOver = true
 	}
@@ -115,27 +120,43 @@ func (m EditorMode) String() string {
 func GetHelpMenu() string {
 	sections := []string{
 		"Movement",
-		"  H J K L - Move",
+		"  H J K L  - Move cursor",
+		"  W        - Next WORD",
+		"  B        - Previous WORD",
+		"  E        - End of WORD",
+		"  w        - Next word",
+		"  b        - Previous word",
+		"  e        - End of word",
+		"  0        - Start of line",
+		"  $        - End of line",
 
-		"Normal Mode",
-		"  X - Delete / Melee Attack",
-		"  R - Replace / Level Up",
-		"  D - Delete Mode / Ranged Attack",
+		"",
+		"Actions",
+		"  X        - Delete / Melee Attack",
+		"  D        - Delete Mode / Ranged Attack",
+		"  R        - Replace Mode / Level Up",
+		"  P        - Drink Health Potion",
 
+		"",
+		"Counts",
+		"  5j       - Move down 5 lines",
+		"  3x       - Delete 3 characters",
+
+		"",
 		"Commands",
-		"  :q - End current game",
-		"  :q! - Quit without saving",
-		"  :w - Check level completion",
-		"  :wq - Complete level and continue",
-		"  :help - Display help menu",
-		"  :debug - Display debug info",
-	}
+		"  :q       - End current game",
+		"  :q!      - Quit immediately",
+		"  :w       - Check level completion",
+		"  :wq      - Complete level and continue",
+		"  :help    - Toggle help menu",
+		"  :debug   - Toggle debug info"}
 
 	return strings.Join(sections, "\n")
 
 }
 
 func (m GameModel) ShowStats() string {
+	mapLevel := fmt.Sprintf("Map Level: %v\n", m.gameState.MapInfo.Level)
 	healthInfo := fmt.Sprintf("Current Health: %v/%v\n", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth)
 	potionCount := 0
 	for _, item := range m.gameState.Stats.Inventory {
@@ -149,7 +170,7 @@ func (m GameModel) ShowStats() string {
 	if potionCount > 0 {
 		potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 5 health! Potions Available: %v\n\n\n", potionCount)
 	}
-	return lipgloss.JoinVertical(lipgloss.Left, healthInfo, charStats, xpInfo, potionsAvailable)
+	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, healthInfo, charStats, xpInfo, potionsAvailable)
 
 }
 func (m *GameModel) AddMessage(msg string) {

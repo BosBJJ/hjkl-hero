@@ -175,7 +175,7 @@ func (gs *GameState) JumpToNextWord() {
 		for i := col; i < len(runes); i++ {
 			currRune := runes[i]
 			switch {
-			case !leftWord && isSpaceOrSymbol(currRune):
+			case !leftWord && currRune == ' ':
 				leftWord = true
 			case leftWord && !isSpaceOrSymbol(currRune):
 				gs.Player.Column = i
@@ -214,14 +214,16 @@ func (gs *GameState) JumpToNext() {
 		col = 0
 	}
 }
-//Jumps to first index of line (shuffled to 1 because hardcoded maps start at index 1, normally is index 0)
+
+// Jumps to first index of line (shuffled to 1 because hardcoded maps start at index 1, normally is index 0)
 func (gs *GameState) JumpToStart() {
 	if gs.MapInfo.MapType != EditorMap {
 		return
 	}
 	gs.Player.Column = 1
 }
-//Jumps to last index of line
+
+// Jumps to last index of line
 func (gs *GameState) JumpToLast() {
 	if gs.MapInfo.MapType != EditorMap {
 		return
@@ -229,7 +231,8 @@ func (gs *GameState) JumpToLast() {
 	lines := ToLines(*gs)
 	gs.Player.Column = len([]rune(lines[gs.Player.Line])) - 1
 }
-//Jumps to end of next word
+
+// Jumps to end of next word
 func (gs *GameState) JumpToEnd() {
 	if gs.MapInfo.MapType != EditorMap {
 		return
@@ -264,6 +267,7 @@ func (gs *GameState) JumpToEnd() {
 		col = 1
 	}
 }
+
 // Jumps to end of word or next punct
 func (gs *GameState) JumpToEndOrPunct() {
 	if gs.MapInfo.MapType != EditorMap {
@@ -307,6 +311,7 @@ func (gs *GameState) JumpToEndOrPunct() {
 		col = 1
 	}
 }
+
 // Jumps to last beginning of word or punctuation
 func (gs *GameState) JumpToPrev() {
 	if gs.MapInfo.MapType != EditorMap {
@@ -333,7 +338,8 @@ func (gs *GameState) JumpToPrev() {
 		}
 	}
 }
-//Jump to last word
+
+// Jump to last word
 func (gs *GameState) JumpToPrevWord() {
 	if gs.MapInfo.MapType != EditorMap {
 		return
@@ -343,7 +349,7 @@ func (gs *GameState) JumpToPrevWord() {
 	for line := gs.Player.Line; line >= 0; line-- {
 		runes := []rune(lines[line])
 		for i := col - 1; i >= 0; i-- {
-			if (i == 0 || isSpaceOrSymbol(runes[i-1])) && !isSpaceOrSymbol(runes[i]) {
+			if (i == 0 || runes[i-1] == ' ') && !isSpaceOrSymbol(runes[i]) {
 				gs.Player.Column = i
 				gs.Player.Line = line
 				return

@@ -39,7 +39,7 @@ func MakeSettingsModel(db *sql.DB, settings storage.Settings) SettingsModel {
 	}
 	return SettingsModel{
 		DB:            db,
-		Options:       []string{"Mode Type", "Theme Picker", "Exit"},
+		Options:       []string{"Game Mode", "Theme Picker", "Exit"},
 		Selected:      -1,
 		ModeSelected:  settings.GameMode,
 		ThemeSelected: settings.ThemeID,

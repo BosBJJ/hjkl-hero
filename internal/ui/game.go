@@ -83,16 +83,17 @@ func (m GameModel) ViewGame() string {
 	)
 	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\n\n%v",
 		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), termInfo)
-	barSize := int(float64(m.width) * 0.20)
+	barSizeLeft := int(float64(m.width) * 0.18)
+	barSizeRight := int(float64(m.width) * 0.24)
 	currentMap := render.Render(m.gameState, m.camera, m.SelectedTheme)
 	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
 	stats := m.ShowStats()
 	messages := m.ShowMessages()
-	leftBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, stats, messages))
+	leftBar := lipgloss.NewStyle().Width(barSizeLeft).Render(lipgloss.JoinVertical(lipgloss.Left, stats, messages))
 	center := lipgloss.NewStyle().Width(m.camera.Width).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, editorInfo))
-	rightBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
+	rightBar := lipgloss.NewStyle().Width(barSizeRight).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
 	if m.DebugMenu {
-		rightBar = lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
+		rightBar = lipgloss.NewStyle().Width(barSizeRight).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 

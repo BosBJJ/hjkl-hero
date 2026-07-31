@@ -18,12 +18,52 @@ type LevelMap string
 
 var Maps = map[int]LevelMap{
 	1: `
- This level is just to show basic functions
- such as x which will delete below your cursor
- r which will replace under the cursor.
- To start, go to the typos and fixx themm by pressinh x orr r
- Goof luCkK!`,
-	2: `###################################
+ Use H J K L to move around, your goal is to get to
+ the bottom row and get to the symbol "*" at the very end and then
+ use "r" which will replace under the cursor.
+ Use "l" to get to the * and replace it with a "#"
+ Type : to enter command mode and then w, this normally
+ just saves in the editor but we use it to check if we're done`,
+	2: `
+ It was pretty annoying to just hold J to get to
+ the bottom row so now
+ we will be introducing the
+ ability to use numbers to multiply
+ how many times your next action is used
+ This line is already 5 rows lower than the start
+ To get to this line quickly you can press 6 and then j, delete the "*" by pressing x`,
+	3: `
+ Now we're gonna introduce w/b/e, use w to jump to * and delete it
+ then *come down to this line (you should be at the end) and use b to jump to come
+ now we're at this line and need to delete the unnecessary* again, press e to jump to the end of words
+ with vim motions using SHIFT before actions will cause them do act differently,
+ capital W will skip to the complete new word and ignore punctuation so skip,this,phrase *with W
+ Same *applies,to,using capital B, it takes you to the beginning of a word ignoring punctuation
+ and with E it,also,does,the,same,thing,but,goes,to,the,end*`,
+	4: `
+ There's a very easy way to jump to the beginning and end of a row
+ to get to the very end of a row all you have to do is press $*
+ *and to jump to the first character/rune just press 0*
+ use these to erase the different places you see a "*"`,
+	5: `
+ Now we're going to learn how to use delete
+ The easiest way to delete a line is by hitting "d" to enter delete mode and then "d" to cut the line
+ ********************************************************
+ practice deleting that line, and then we can undo it by pressing "u"
+ if we want to redo that action we can press "CTRL + r"
+ You can also use "d" to enter delete mode and then select a direction
+ When you're done playing around just undo everything and save the map with the asterisk line deleted`,
+	6: `
+ That's all for the current tutorial maps, more to be made in the future
+ Now if you want to use the new keys you learned a lot in a game setting you can press :wq and
+ the tutorials game mode will start, it is two levels on easy mode.
+ The enemies take one action per one of your actions,
+ if you are about to be hit you can use a number + direction and
+ skip in that direction freely, use :help to see all of the commands available
+ If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
+ harder and has procedurally generated maps`,
+
+	7: `###################################
 #.................................#
 #.................................#
 ###############...#############..##
@@ -37,7 +77,8 @@ var Maps = map[int]LevelMap{
 #....^............................#
 #.................................#
 ###################################`,
-	3: `###################################
+
+	8: `###################################
 ###################################
 ###################################
 #######################...........#
@@ -57,11 +98,49 @@ var Maps = map[int]LevelMap{
 
 var AnswerMap = map[int]LevelMap{
 	1: `
- This level is just to show basic functions
- such as x which will delete below your cursor
- r which will replace under the cursor.
- To start, go to the typos and fix them by pressing x or r
- Good luck!`,
+ Use H J K L to move around, your goal is to get to
+ the bottom row and get to the symbol "*" at the very end and then
+ use "r" which will replace under the cursor.
+ Use "l" to get to the # and replace it with a "#"
+ Type : to enter command mode and then w, this normally
+ just saves in the editor but we use it to check if we're done`,
+	2: `
+ It was pretty annoying to just hold J to get to
+ the bottom row so now
+ we will be introducing the
+ ability to use numbers to multiply
+ how many times your next action is used
+ This line is already 5 rows lower than the start
+ To get to this line quickly you can press 6 and then j, delete the "" by pressing x`,
+	3: `
+ Now we're gonna introduce w/b/e, use w to jump to  and delete it
+ then come down to this line (you should be at the end) and use b to jump to come
+ now we're at this line and need to delete the unnecessary again, press e to jump to the end of words
+ with vim motions using SHIFT before actions will cause them do act differently,
+ capital W will skip to the complete new word and ignore punctuation so skip,this,phrase with W
+ Same applies,to,using capital B, it takes you to the beginning of a word ignoring punctuation
+ and with E it,also,does,the,same,thing,but,goes,to,the,end`,
+	4: `
+ There's a very easy way to jump to the beginning and end of a row
+ to get to the very end of a row all you have to do is press $
+ and to jump to the first character/rune just press 0
+ use these to erase the different places you see a ""`,
+	5: `
+ Now we're going to learn how to use delete
+ The easiest way to delete a line is by hitting "d" to enter delete mode and then "d" to cut the line
+ practice deleting that line, and then we can undo it by pressing "u"
+ if we want to redo that action we can press "CTRL + r"
+ You can also use "d" to enter delete mode and then select a direction
+ When you're done playing around just undo everything and save the map with the asterisk line deleted`,
+	6: `
+ That's all for the current tutorial maps, more to be made in the future
+ Now if you want to use the new keys you learned a lot in a game setting you can press :wq and
+ the tutorials game mode will start, it is two levels on easy mode.
+ The enemies take one action per one of your actions,
+ if you are about to be hit you can use a number + direction and
+ skip in that direction freely, use :help to see all of the commands available
+ If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
+ harder and has procedurally generated maps`,
 }
 
 type Room struct {

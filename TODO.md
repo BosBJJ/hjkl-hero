@@ -1,15 +1,6 @@
 - [ ] Add more simple commands
-    - [x] b/w/e
     - [ ] Yank
         - [ ] Copy current line? Maybe keep it simple and just have y-y
+    - [ ] Paste
 - [ ] Add items in room map types
     - [ ] health pack/treasures? 
-- [ ] Add more maps
-    - [ ] First map get to * using HJKL, use replace, learn how to use :w and :wq
-    - [ ] Second map using numbers, jump down X lines, use X to delete
-    - [ ] Third map using b/w/e
-    - [ ] Fourth map yank/paste/delete lines and undo/redo
-    - [ ] Fifth map edit the text
-- [x] SQL
-    - [x] Have theme menu show what live game looks like, let player pick a theme or customize wall color/style, floor color/style, player color
-
