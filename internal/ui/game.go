@@ -51,8 +51,7 @@ type GameModel struct {
 	PendingCmd    bool
 	CmdCount      int
 	CmdText       string
-	GameMessage   string
-	EnemyMsg      string
+	MessageLog    []string
 	LevelMsg      string
 	GameOver      bool
 	TotalMoves    int
@@ -63,10 +62,11 @@ type GameModel struct {
 }
 
 type RunStats struct {
-	Kills      int
-	TotalXp    int
-	TotalMoves int
-	MapLevel   int
+	Kills       int
+	TotalXp     int
+	TotalMoves  int
+	MapLevel    int
+	DamageTaken int
 }
 
 func (m GameModel) ViewGame() string {
@@ -86,9 +86,9 @@ func (m GameModel) ViewGame() string {
 	barSize := int(float64(m.width) * 0.20)
 	currentMap := render.Render(m.gameState, m.camera, m.SelectedTheme)
 	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
-	characterInfo := fmt.Sprintf("Current Health: %v/%v\n\nXP %v/10\n\n%v", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth, m.gameState.Stats.XPGained, m.LevelMsg)
-	combatMessages := fmt.Sprintf("Game Message: %v\n\n%v", m.GameMessage, m.EnemyMsg)
-	leftBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, characterInfo, combatMessages))
+	stats := m.ShowStats()
+	messages := m.ShowMessages()
+	leftBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, stats, messages))
 	center := lipgloss.NewStyle().Width(m.camera.Width).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, editorInfo))
 	rightBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
 	if m.DebugMenu {

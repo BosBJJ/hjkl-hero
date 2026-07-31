@@ -22,6 +22,10 @@ var ZanthStyle = lipgloss.NewStyle(). //Zanth is a friend who loves playing tank
 	Background(Green).
 	Foreground(Black)
 
+var PotionStyle = lipgloss.NewStyle().
+	Foreground(RedDark).
+	Background(Yellow)
+
 var WallStyle = lipgloss.NewStyle().
 	Foreground(GrayDark) // I like Magenta here
 

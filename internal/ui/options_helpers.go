@@ -317,6 +317,7 @@ func (m SettingsModel) showValues() string {
 				optionBoxes = append(optionBoxes, style.EditorPanelStyle.
 					Align(lipgloss.Center).
 					AlignVertical(lipgloss.Center).
+					BorderForeground(style.White).
 					Render(icon.Name)+"\n")
 			} else {
 				optionBoxes = append(optionBoxes, style.EditorPanelStyle.
@@ -332,6 +333,7 @@ func (m SettingsModel) showValues() string {
 				optionBoxes = append(optionBoxes, style.EditorPanelStyle.
 					Align(lipgloss.Center).
 					AlignVertical(lipgloss.Center).
+					BorderForeground(style.White).
 					Render(icon.Symbol)+"\n")
 			} else {
 				optionBoxes = append(optionBoxes, style.EditorPanelStyle.

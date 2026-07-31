@@ -1,16 +1,18 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m *GameModel) LevelUp() {
 	m.CmdText = ""
-	m.GameMessage = ""
+	m.MessageLog = nil
 	m.EditorMode = NormalMode
 	nextLevel := m.gameState.MapInfo.Level + 1
 	switch m.GameType {
@@ -64,10 +66,11 @@ func (m *GameModel) CheckGameState() {
 
 func GetRunStats(m GameModel) RunStats {
 	return RunStats{
-		Kills:      m.gameState.Stats.Kills,
-		TotalXp:    m.gameState.Stats.TotalXP,
-		TotalMoves: m.TotalMoves,
-		MapLevel:   m.gameState.MapInfo.Level,
+		Kills:       m.gameState.Stats.Kills,
+		TotalXp:     m.gameState.Stats.TotalXP,
+		TotalMoves:  m.TotalMoves,
+		MapLevel:    m.gameState.MapInfo.Level,
+		DamageTaken: m.gameState.Stats.DamageTaken,
 	}
 }
 
@@ -81,6 +84,7 @@ func makeBaseCharacter() game.PlayerInfo {
 		XPGained:      0,
 		TotalXP:       0,
 		Kills:         0,
+		DamageTaken:   0,
 	}
 }
 
@@ -129,4 +133,36 @@ func GetHelpMenu() string {
 
 	return strings.Join(sections, "\n")
 
+}
+
+func (m GameModel) ShowStats() string {
+	healthInfo := fmt.Sprintf("Current Health: %v/%v\n", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth)
+	potionCount := 0
+	for _, item := range m.gameState.Stats.Inventory {
+		if item.Type == game.HealthPotion {
+			potionCount++
+		}
+	}
+	charStats := fmt.Sprintf("Gold: %v\n\nAttack Damage: %v\nCrit Chance: %v%%\nCrit Multi: %vx\n\n\n", m.gameState.Stats.Gold, m.gameState.Stats.BaseDmg, m.gameState.Stats.CritChance, m.gameState.Stats.BaseCritMulti)
+	xpInfo := fmt.Sprintf("XP %v/10\n\n%v", m.gameState.Stats.XPGained, m.LevelMsg)
+	potionsAvailable := fmt.Sprintf("Potions Available: %v\n\n\n", potionCount)
+	if potionCount > 0 {
+		potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 5 health! Potions Available: %v\n\n\n", potionCount)
+	}
+	return lipgloss.JoinVertical(lipgloss.Left, healthInfo, charStats, xpInfo, potionsAvailable)
+
+}
+func (m *GameModel) AddMessage(msg string) {
+	if msg == "" {
+		return
+	}
+	m.MessageLog = append(m.MessageLog, msg)
+	const maxMessages = 6
+	if len(m.MessageLog) > maxMessages {
+		m.MessageLog = m.MessageLog[len(m.MessageLog)-maxMessages:]
+	}
+}
+
+func (m GameModel) ShowMessages() string {
+	return strings.Join(m.MessageLog, "\n")
 }

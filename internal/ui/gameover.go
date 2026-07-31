@@ -127,13 +127,14 @@ func (m GameOverModel) ViewGameOver() string {
 			fmt.Sprintf("XP: %v", m.Stats.TotalXp),
 			fmt.Sprintf("Moves: %v", m.Stats.TotalMoves),
 			fmt.Sprintf("Level: %v", m.Stats.MapLevel),
+			fmt.Sprintf("Damage Taken: %v", m.Stats.DamageTaken),
 		}
 		for _, stat := range stats {
 			optionBoxes = append(optionBoxes, style.HSStyle.
 				Align(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				Width(80).
-				Height(3).
+				Height(2).
 				Render(stat)+"\n")
 		}
 		optionBoxes = append(optionBoxes, style.CurrentOptionStyle.

@@ -87,6 +87,7 @@ func (gs *GameState) MeleeAttack() CombatLog {
 				gs.Stats.XPGained += xp
 				gs.Stats.TotalXP += xp
 				gs.Stats.Kills += 1
+				gs.DropPotion(enemyLine, enemyCol)
 				log.Experience = xp
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			}
@@ -177,11 +178,13 @@ func (gs *GameState) TryDamagePlayer() string {
 			case Normal:
 				if successfulHit() {
 					gs.Stats.CurrentHealth -= enemy.BaseDmg
+					gs.Stats.DamageTaken += enemy.BaseDmg
 					hitMsg = fmt.Sprintf("Enemy %v hit player for %v", enemy.EnemyType, enemy.BaseDmg)
 				}
 			case Chaser:
 				if successfulHit() {
 					gs.Stats.CurrentHealth -= enemy.BaseDmg
+					gs.Stats.DamageTaken += enemy.BaseDmg
 					hitMsg = fmt.Sprintf("You were hit by a %v for %v damage! Make sure to dodge!", enemy.EnemyType, enemy.BaseDmg)
 					enemy.Health = 0
 					gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
@@ -189,6 +192,7 @@ func (gs *GameState) TryDamagePlayer() string {
 			case Tank:
 				if successfulHit() {
 					gs.Stats.CurrentHealth -= enemy.BaseDmg
+					gs.Stats.DamageTaken += enemy.BaseDmg
 					hitMsg = fmt.Sprintf("Enemy %v hit player for %v", enemy.EnemyType, enemy.BaseDmg)
 				}
 			}

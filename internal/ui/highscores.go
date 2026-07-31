@@ -61,7 +61,7 @@ func (m HighScoresModel) UpdateHighScores(msg tea.Msg) (HighScoresModel, tea.Cmd
 }
 
 func parseScore(r storage.Run) string {
-	return fmt.Sprintf("%-20s | %5d | %9d | %5d | %13d | %-8s | %-20s |", r.PlayerName, r.Kills, r.TotalXp, r.TotalMoves, r.MapLevel, r.GameMode, r.FinishedAt)
+	return fmt.Sprintf("%-20s | %5d | %9d | %5d | %13d | %-8s | %-20s | %5d", r.PlayerName, r.Kills, r.TotalXp, r.TotalMoves, r.MapLevel, r.GameMode, r.FinishedAt, r.DamageTaken)
 }
 
 func (m HighScoresModel) ViewHighScores() string {
@@ -77,7 +77,7 @@ func (m HighScoresModel) ViewHighScores() string {
 		Width(m.width).
 		Align(lipgloss.Center).
 		Render(Title) + "\n"
-	header := fmt.Sprintf("%-20s | %5s | %9s | %5s | %13s | %-8s | %-20s |",
+	header := fmt.Sprintf("%-20s | %5s | %9s | %5s | %13s | %-8s | %-20s | %5s",
 		"Name",
 		"Kills",
 		"XP Gained",
@@ -85,11 +85,13 @@ func (m HighScoresModel) ViewHighScores() string {
 		"Map Level",
 		"Mode",
 		"Date Logged",
+		"Damage Taken",
 	)
 	scores := []string{}
+	barSize := int(float64(m.width) * 0.60)
 	scores = append(scores,
 		style.HeaderStyle.
-			Width(110).
+			Width(barSize).
 			Align(lipgloss.Center).
 			Render(header))
 	optionBoxes := []string{}
@@ -98,7 +100,7 @@ func (m HighScoresModel) ViewHighScores() string {
 	for _, score := range m.Scores[m.Offset:end] {
 		scores = append(scores,
 			style.HSStyle.
-				Width(110).
+				Width(barSize).
 				Align(lipgloss.Center).
 				Render(parseScore(score)),
 		)

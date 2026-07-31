@@ -154,12 +154,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch gameOver.Selected {
 			case 0:
 				storage.SaveRun(m.DB, storage.Run{
-					PlayerName: gameOver.PlayerName,
-					Kills:      gameOver.Stats.Kills,
-					TotalXp:    gameOver.Stats.TotalXp,
-					TotalMoves: gameOver.Stats.TotalMoves,
-					MapLevel:   gameOver.Stats.MapLevel,
-					GameMode:   m.CurrentSettings.GameMode,
+					PlayerName:  gameOver.PlayerName,
+					Kills:       gameOver.Stats.Kills,
+					TotalXp:     gameOver.Stats.TotalXp,
+					TotalMoves:  gameOver.Stats.TotalMoves,
+					MapLevel:    gameOver.Stats.MapLevel,
+					GameMode:    m.CurrentSettings.GameMode,
+					DamageTaken: m.GameOver.Stats.DamageTaken,
 				})
 				hs, _ := storage.ShowScores(m.DB)
 				m.HighScores.Scores = hs

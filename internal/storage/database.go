@@ -9,14 +9,15 @@ import (
 )
 
 type Run struct {
-	Id         int
-	PlayerName string
-	Kills      int
-	TotalXp    int
-	TotalMoves int
-	MapLevel   int
-	GameMode   GameMode
-	FinishedAt string
+	Id          int
+	PlayerName  string
+	Kills       int
+	TotalXp     int
+	TotalMoves  int
+	MapLevel    int
+	GameMode    GameMode
+	FinishedAt  string
+	DamageTaken int
 }
 
 type Settings struct {
@@ -45,7 +46,8 @@ func CreateHSSchema(db *sql.DB) error {
 	total_moves INTEGER,
 	map_level INTEGER,
 	game_mode TEXT,
-	finished_at TEXT);
+	finished_at TEXT,
+	damage_taken INTEGER);
 	`
 	_, err := db.Exec(query)
 	return err
@@ -162,10 +164,10 @@ func LoadCustomTheme(db *sql.DB) (Theme, error) {
 func SaveRun(db *sql.DB, run Run) error {
 	run.FinishedAt = time.Now().UTC().Format(time.RFC3339)
 
-	query := `INSERT INTO scores (name, kills, total_xp, total_moves, map_level, game_mode, finished_at)
-	VALUES (?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO scores (name, kills, total_xp, total_moves, map_level, game_mode, finished_at, damage_taken)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err := db.Exec(query, run.PlayerName, run.Kills, run.TotalXp, run.TotalMoves, run.MapLevel, run.GameMode, run.FinishedAt)
+	_, err := db.Exec(query, run.PlayerName, run.Kills, run.TotalXp, run.TotalMoves, run.MapLevel, run.GameMode, run.FinishedAt, run.DamageTaken)
 
 	return err
 }
@@ -183,7 +185,7 @@ func ShowScores(db *sql.DB) ([]Run, error) {
 
 	for rows.Next() {
 		var run Run
-		err = rows.Scan(&run.Id, &run.PlayerName, &run.Kills, &run.TotalXp, &run.TotalMoves, &run.MapLevel, &run.GameMode, &run.FinishedAt)
+		err = rows.Scan(&run.Id, &run.PlayerName, &run.Kills, &run.TotalXp, &run.TotalMoves, &run.MapLevel, &run.GameMode, &run.FinishedAt, &run.DamageTaken)
 		if err != nil {
 			return nil, fmt.Errorf("error: %v", err)
 		}

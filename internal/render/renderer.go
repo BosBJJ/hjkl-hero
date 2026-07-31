@@ -46,6 +46,7 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 		for x := left; x < rowRight; x++ {
 			rune := RuneMap[y][x]
 			enemy, isEnemy := gs.EnemyAt(y, x)
+			item, isItem := gs.ItemAt(y, x)
 			switch {
 			case y == playerY && x == playerX:
 				if gs.MapInfo.MapType == game.EditorMap {
@@ -62,6 +63,10 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 				}
 				if enemy.EnemyType == game.Tank {
 					rendered.WriteString(style.ZanthStyle.Render("Z"))
+				}
+			case isItem:
+				if item.Type == game.HealthPotion {
+					rendered.WriteString(style.PotionStyle.Render("P"))
 				}
 			case rune == '.':
 				if gs.MapInfo.MapType == game.EditorMap {

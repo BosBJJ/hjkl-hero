@@ -42,12 +42,13 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.AdjustCamera()
 			m.TotalMoves += 1
 			m.CmdCount = 0
-			m.GameMessage = ""
-			m.EnemyMsg = m.gameState.ChasePlayer()
+			chase := m.gameState.ChasePlayer()
+			m.AddMessage(chase)
 			m.CheckGameState()
 			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
-				m.GameMessage = "You have reached the stairs! Press SPACE to go to next floor!"
+				m.AddMessage("You have reached the stairs! Press SPACE to go to next floor!")
 			}
+			m.gameState.GrabItem()
 		case "w":
 			m.gameState.JumpToNext()
 		case "W":
@@ -68,6 +69,8 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			}
 		case "$":
 			m.gameState.JumpToLast()
+		case "p":
+			m.gameState.UsePotion()
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				if gs.MapInfo.MapType == game.EditorMap {
@@ -75,8 +78,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 				} else {
 					combatLog := gs.MeleeAttack()
 					cmbMsg := combatLog.ParseLog()
-					m.GameMessage = cmbMsg
-					m.EnemyMsg = gs.ChasePlayer()
+					m.AddMessage(cmbMsg)
+					chase := gs.ChasePlayer()
+					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
 						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
@@ -162,8 +166,9 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 				} else {
 					combatLog := gs.RangedAttack(key)
 					cmbMsg := combatLog.ParseLog()
-					m.GameMessage = cmbMsg
-					m.EnemyMsg = gs.ChasePlayer()
+					m.AddMessage(cmbMsg)
+					chase := gs.ChasePlayer()
+					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
 						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
@@ -194,11 +199,13 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 			return m, tea.Quit
 		case "w":
 			if m.gameState.MapComplete() {
-				m.GameMessage = `Level Completed! Please use ":wq" to close the level!`
+				levelComplete := `Level Completed! Please use ":wq" to close the level!`
+				m.AddMessage(levelComplete)
 				m.CmdText = ""
 				m.EditorMode = NormalMode
 			} else {
-				m.GameMessage = "Mistakes still found, keep trying"
+				keepTrying := "Mistakes still found, keep trying"
+				m.AddMessage(keepTrying)
 				m.CmdText = ""
 				m.EditorMode = NormalMode
 			}
@@ -208,7 +215,8 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 				m.CheckGameState()
 				return m, nil
 			} else {
-				m.GameMessage = `Mistakes still found, keep trying and use ":w" to check status`
+				keepTrying := `Mistakes still found, keep trying and use ":w" to check status`
+				m.AddMessage(keepTrying)
 				m.CmdText = ""
 				m.EditorMode = NormalMode
 			}

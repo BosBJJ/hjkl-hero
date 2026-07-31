@@ -9,6 +9,7 @@ type GameState struct {
 	Player   Position
 	Stats    PlayerInfo
 	Enemies  []EnemyInfo
+	Items    []Item
 	MapInfo  MapInfo
 	undoSnap []SnapShot
 	redoSnap []SnapShot
@@ -23,6 +24,9 @@ type PlayerInfo struct {
 	XPGained      int
 	TotalXP       int
 	Kills         int
+	DamageTaken   int
+	Inventory     []Item
+	Gold          int
 }
 
 type SnapShot struct {
@@ -36,6 +40,20 @@ type EnemyInfo struct {
 	BaseDmg   int
 	Health    int
 	MoveCount int
+}
+
+type ItemType int
+
+const (
+	HealthPotion ItemType = iota
+	Gold         ItemType = iota
+)
+
+type Item struct {
+	Type   ItemType
+	Amount int
+	Line   int
+	Col    int
 }
 
 type CombatLog struct {
