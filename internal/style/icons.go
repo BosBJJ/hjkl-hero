@@ -7,10 +7,10 @@ type NameIcon struct {
 
 var WallIcons = []NameIcon{
 	{"Fully Shaded Wall", "\u2593"},
-	{"3/4 Shaded Wall", "\u2592"},
-	{"1/2 Shaded Wall", "\u2591"},
+	{"Medium Shaded Wall", "\u2592"},
+	{"Light Shaded Wall", "\u2591"},
 	{"Hash", "#"},
-	{"Trees", "\u25B2"},
+	{"Trees", "\u234B"},
 }
 
 var FloorIcons = []NameIcon{
@@ -23,6 +23,6 @@ var FloorIcons = []NameIcon{
 var PlayerIcons = []NameIcon{
 	{"At", "@"},
 	{"Star", "*"},
-	{"Skull", "\u2620"},
+	{"Dagger", "\u2E38"},
 	{"Arrow", "\u25B2"},
 }

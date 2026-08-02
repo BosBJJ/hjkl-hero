@@ -23,6 +23,9 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.camera.Height = m.height - 4
+		sides := int(float64(m.width) * 0.20)
+		m.camera.Width = m.width - sides - sides
 		m.AdjustCamera()
 	}
 	return m, nil
@@ -47,6 +50,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.CheckGameState()
 			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.AddMessage("You have reached the stairs! Press SPACE to go to next floor!")
+			}
+			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
+				m.AddMessage("You have found a chest! Press SPACE to go unlock it!")
 			}
 			m.gameState.GrabItem()
 		case "w":
@@ -83,7 +89,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
+						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
 					}
 				}
 				m.TotalMoves += 1
@@ -118,6 +124,10 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 				m.LevelUp()
 				m.CheckGameState()
 				m.TotalMoves += 1
+			}
+			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
+				obtained := m.gameState.OpenChest(m.gameState.Player.Line, m.gameState.Player.Column)
+				m.AddMessage(obtained)
 			}
 		}
 	}
@@ -171,7 +181,7 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier"
+						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
 					}
 				}
 				m.TotalMoves += 1
@@ -220,10 +230,12 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 				m.CmdText = ""
 				m.EditorMode = NormalMode
 			}
-		case "GoUpALevel": //REMOVE LATER JUST FOR TESTING
+		case "g": //REMOVE LATER JUST FOR TESTING
 			m.LevelUp()
 			m.CheckGameState()
 			return m, nil
+		case "cheat":
+			m.gameState.Stats.XPGained += 10
 		case "help":
 			m.HelpMenu = !m.HelpMenu
 			m.CmdText = ""

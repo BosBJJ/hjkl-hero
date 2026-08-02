@@ -15,7 +15,8 @@ var MeleerStyle = lipgloss.NewStyle().
 	Background(Red).
 	Foreground(Peach)
 
-var ZanthStyle = lipgloss.NewStyle(). //Zanth is a friend who loves playing tank, so this is a mob dedicated to him
+// Zanth is a friend who loves playing tank, so this is a mob dedicated to him
+var ZanthStyle = lipgloss.NewStyle().
 	Background(Green).
 	Foreground(Black)
 
@@ -27,9 +28,27 @@ var StairStyle = lipgloss.NewStyle().
 	Background(White).
 	Foreground(Brown)
 
-var StatsStyle = lipgloss.NewStyle().
+var ChestStyle = lipgloss.NewStyle().
+	Background(Brown).
+	Foreground(Golden)
+
+// Health Styles
+var HealthBase = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).
-	Background(Green).
-	BorderForeground(Magenta).
-	Foreground(Magenta).
+	Width(30).
+	Height(1).
+	Align(lipgloss.Center).
+	AlignVertical(lipgloss.Center).
 	Bold(true)
+var FullHealth = HealthBase.
+	Background(Green).
+	BorderForeground(Green).
+	Foreground(Magenta)
+var LowerHealth = HealthBase.
+	Background(Yellow).
+	BorderForeground(Yellow).
+	Foreground(Magenta)
+var LowHealth = HealthBase.
+	Background(Red).
+	BorderForeground(Red).
+	Foreground(White)

@@ -101,6 +101,9 @@ func (gs *GameState) LevelStats(input string) {
 		gs.Stats.CritChance += 2
 	case "m":
 		gs.Stats.BaseCritMulti += 1
+	default:
+		return
 	}
 	gs.Stats.XPGained -= 10
+	gs.Stats.PlayerLevel++
 }

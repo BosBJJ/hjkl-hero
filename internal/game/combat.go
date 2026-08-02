@@ -56,6 +56,7 @@ func (gs *GameState) RangedAttack(direction string) CombatLog {
 			gs.Stats.XPGained += xp
 			gs.Stats.TotalXP += xp
 			gs.Stats.Kills += 1
+			gs.GetLootFromKill(enemyLine, enemyCol, Ranged)
 			gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			break
 		}
@@ -87,7 +88,7 @@ func (gs *GameState) MeleeAttack() CombatLog {
 				gs.Stats.XPGained += xp
 				gs.Stats.TotalXP += xp
 				gs.Stats.Kills += 1
-				gs.DropPotion(enemyLine, enemyCol)
+				gs.GetLootFromKill(enemyLine, enemyCol, Melee)
 				log.Experience = xp
 				gs.Enemies = append(gs.Enemies[:i], gs.Enemies[i+1:]...)
 			}
@@ -95,6 +96,18 @@ func (gs *GameState) MeleeAttack() CombatLog {
 		}
 	}
 	return log
+}
+
+func (gs *GameState) GetLootFromKill(line, col int, style AttackType) { //Future- add character class
+	dropChance := rand.IntN(100)
+	switch style {
+	case Melee:
+		gs.DropPotion(line, col)
+	case Ranged:
+		if dropChance > 50 {
+			gs.DropPotion(line, col)
+		}
+	}
 }
 
 func (l CombatLog) ParseLog() string {
@@ -123,9 +136,9 @@ func (e EnemyInfo) GetExperience(attack AttackType) int {
 	xpDrop := 0
 	switch e.EnemyType {
 	case Normal:
-		xpDrop = 4
+		xpDrop = 2
 	case Tank:
-		xpDrop = 20
+		xpDrop = 10
 	}
 	if attack == Ranged {
 		xpDrop /= 2

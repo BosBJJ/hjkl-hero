@@ -165,7 +165,7 @@ func generateBlock(height, width int) [][]rune {
 
 // Marks Top/Bottom Left/Right of a room within a block
 func MakeRoom(tileMap [][]rune) Room {
-	maxSize := 20
+	maxSize := 18
 	minSize := 8
 	roomHeight := rand.Intn(maxSize-minSize+1) + minSize
 	roomWidth := rand.Intn(maxSize-minSize+1) + minSize
@@ -200,7 +200,10 @@ func (r Room) RoomOverlap(new Room) bool {
 // Marks borders of each room, ensures no collision
 func MakeRooms(count int, tileMap [][]rune) []Room {
 	var rooms []Room
-	for len(rooms) < count {
+	attempts := 0
+	maxAttempts := count * 100
+	for len(rooms) < count && attempts < maxAttempts {
+		attempts++
 		newRoom := MakeRoom(tileMap)
 		overlap := false
 
@@ -273,6 +276,10 @@ func MakeMap(height, width, numOfRooms int) LevelMap {
 		}
 	}
 	MakeStairs(rooms, tileMap)
+	MakeChest(rooms, tileMap)
+	if numOfRooms > 20 {
+		MakeChest(rooms, tileMap)
+	}
 	var newMap strings.Builder
 	for _, row := range tileMap {
 		for _, rune := range row {
@@ -289,4 +296,20 @@ func MakeStairs(rooms []Room, tileMap [][]rune) {
 	x := rand.Intn(room.X2-room.X1) + room.X1
 	y := rand.Intn(room.Y2-room.Y1) + room.Y1
 	tileMap[y][x] = '^'
+}
+
+func MakeChest(rooms []Room, tileMap [][]rune) {
+	roll := rand.Intn(100)
+	if roll > 40 {
+		room := rooms[rand.Intn(len(rooms))]
+		x := rand.Intn(room.X2-room.X1) + room.X1
+		y := rand.Intn(room.Y2-room.Y1) + room.Y1
+		tileMap[y][x] = '+'
+	}
+}
+
+func ReplaceTile(mapLines []string, line, col int, input rune) {
+	runes := []rune(mapLines[line])
+	runes[col] = input
+	mapLines[line] = string(runes)
 }

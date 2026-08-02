@@ -14,6 +14,7 @@ var (
 	Orange      = lipgloss.Color("#f25e01")
 	Yellow      = lipgloss.Color("#b3f63a")
 	YellowLight = lipgloss.Color("#ffec40")
+	Golden      = lipgloss.Color("#f0a905")
 	Magenta     = lipgloss.Color("#ff0cac")
 
 	Blue      = lipgloss.Color("#6b8ab8")
@@ -33,7 +34,7 @@ var (
 	GrayDarker = lipgloss.Color("#35384a")
 
 	Black = lipgloss.Color("#272822")
-	Brown = lipgloss.Color("#2B2621")
+	Brown = lipgloss.Color("#422305")
 	White = lipgloss.Color("#ffffff")
 )
 
@@ -48,6 +49,7 @@ var ColorNames = map[string]lipgloss.Color{
 	"orange":       Orange,
 	"yellow":       Yellow,
 	"yellow_light": YellowLight,
+	"golden":       Golden,
 	"magenta":      Magenta,
 
 	"blue":       Blue,
@@ -80,6 +82,7 @@ var Colors = []NameColor{
 	{"orange", Orange},
 	{"yellow", Yellow},
 	{"yellow_light", YellowLight},
+	{"golden", Golden},
 	{"magenta", Magenta},
 
 	{"blue", Blue},

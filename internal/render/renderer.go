@@ -74,8 +74,10 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 				} else {
 					rendered.WriteString(theme.FloorStyle)
 				}
-			case rune == '^':
+			case rune == '^': //Stairs
 				rendered.WriteString(style.StairStyle.Render("^"))
+			case rune == '+': //Chest
+				rendered.WriteString(style.ChestStyle.Render("\u233A"))
 			default:
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(string(rune))

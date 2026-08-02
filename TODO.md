@@ -2,5 +2,3 @@
     - [ ] Yank
         - [ ] Copy current line? Maybe keep it simple and just have y-y
     - [ ] Paste
-- [ ] Add items in room map types
-    - [ ] health pack/treasures? 

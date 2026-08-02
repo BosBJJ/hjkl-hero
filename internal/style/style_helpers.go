@@ -11,6 +11,11 @@ type GameStyle struct {
 	PlayerStyle string
 }
 
+type PanelStyle struct {
+	WallColor  string
+	FloorColor string
+}
+
 func MakeStyle(themeID storage.ThemeID) GameStyle {
 	theme, ok := Themes[themeID]
 	if !ok {
@@ -32,4 +37,12 @@ func MakeStyleFromTheme(theme storage.Theme) GameStyle {
 
 func GetColor(name string) lipgloss.Color {
 	return ColorNames[name]
+}
+
+func MakePanelColor(themeID storage.ThemeID) PanelStyle {
+	theme := Themes[themeID]
+	return PanelStyle{
+		WallColor:  theme.WallColor,
+		FloorColor: theme.FloorColor,
+	}
 }

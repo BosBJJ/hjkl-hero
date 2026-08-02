@@ -19,14 +19,14 @@ var Themes = map[storage.ThemeID]storage.Theme{
 
 		WallIcon:   "\u2591",
 		FloorIcon:  "\u2219",
-		PlayerIcon: "\u2620",
+		PlayerIcon: "\u2E38",
 	},
 	storage.WinterTheme: {
 		WallColor:   "green",
 		FloorColor:  "white",
 		PlayerColor: "yellow_light",
 
-		WallIcon:   "\u25B2",
+		WallIcon:   "\u234B",
 		FloorIcon:  " ",
 		PlayerIcon: "*",
 	},

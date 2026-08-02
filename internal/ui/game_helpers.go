@@ -7,6 +7,7 @@ import (
 	"github.com/BosBJJ/hjkl-hero/internal/game"
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
+	"github.com/BosBJJ/hjkl-hero/internal/style"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -20,15 +21,11 @@ func (m *GameModel) LevelUp() {
 		m.gameState.MapInfo = game.GetMapInfo(nextLevel)
 	case storage.RogueLikeMode:
 		m.gameState.MapInfo.Level++
+		level := m.gameState.MapInfo.Level
 		var height, width, rooms int
-		height = 60
-		width = 80
-		rooms = 15
-		for range m.gameState.MapInfo.Level {
-			height += 10
-			width += 20
-			rooms += 2
-		}
+		height = 60 + (level-1)*2
+		width = 80 + (level-1)*4
+		rooms = 15 + level
 		m.gameState.MapInfo.LevelMap = levels.MakeMap(height, width, rooms)
 		m.gameState.MapInfo.MapType = game.RoomMap
 	}
@@ -76,6 +73,7 @@ func GetRunStats(m GameModel) RunStats {
 		TotalMoves:  m.TotalMoves,
 		MapLevel:    m.gameState.MapInfo.Level,
 		DamageTaken: m.gameState.Stats.DamageTaken,
+		PlayerLevel: m.gameState.Stats.PlayerLevel,
 	}
 }
 
@@ -90,6 +88,7 @@ func makeBaseCharacter() game.PlayerInfo {
 		TotalXP:       0,
 		Kills:         0,
 		DamageTaken:   0,
+		PlayerLevel:   1,
 	}
 }
 
@@ -132,8 +131,8 @@ func GetHelpMenu() string {
 
 		"",
 		"Actions",
-		"  X        - Delete / Melee Attack",
-		"  D        - Delete Mode / Ranged Attack",
+		"  X        - Delete / Melee ATK",
+		"  D        - Delete Mode / Ranged ATK",
 		"  R        - Replace Mode / Level Up",
 		"  P        - Drink Health Potion",
 
@@ -147,38 +146,96 @@ func GetHelpMenu() string {
 		"  :q       - End current game",
 		"  :q!      - Quit immediately",
 		"  :w       - Check level completion",
-		"  :wq      - Complete level and continue",
+		"  :wq      - Complete and continue",
 		"  :help    - Toggle help menu",
 		"  :debug   - Toggle debug info"}
 
 	return strings.Join(sections, "\n")
 
 }
+func DisplayHealth(currHP, maxHP int) string {
+	healthInfo := fmt.Sprintf("Current Health: %v/%v", currHP, maxHP)
+	if currHP <= 5 {
+		return style.LowHealth.Render(healthInfo)
+	}
+	if currHP > 5 && currHP < 15 {
+		return style.LowerHealth.Render(healthInfo)
+	}
+	return style.FullHealth.Render(healthInfo)
+}
+func (gs *GameModel) makePanel() lipgloss.Style {
+	colors := style.MakePanelColor(gs.SelectedTheme)
+	return lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		Background(style.GetColor(colors.WallColor)).
+		Padding(1).
+		BorderForeground(style.GetColor(colors.FloorColor)).
+		Foreground(style.GetColor(colors.FloorColor)).
+		Bold(true)
+
+}
+
+func (m GameModel) displayLeftPanel() string {
+	panelcolors := m.makePanel()
+	barSizeLeft := int(float64(m.width) * 0.18)
+	stats := m.ShowStats()
+	messages := m.ShowMessages()
+	leftBar := panelcolors.Width(barSizeLeft).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Left, stats, "Game Messages", "-----------------------------", messages))
+	return leftBar
+}
+
+func (m GameModel) displayRightPanel() string {
+	panelcolors := m.makePanel()
+	height, width := game.GetMapSize(m.gameState)
+	barSizeRight := int(float64(m.width) * 0.20)
+	helpMenu := "Type :help to display help menu"
+	if m.HelpMenu == true {
+		helpMenu = GetHelpMenu()
+	}
+	termInfo := fmt.Sprintf(
+		"Terminal: %dx%d\nCamera: %dx%d\nMap: %dx%d",
+		m.width, m.height,
+		m.camera.Width, m.camera.Height,
+		height, width,
+	)
+	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
+		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
+	rightBar := panelcolors.Width(barSizeRight).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
+	if m.DebugMenu {
+		rightBar = panelcolors.Width(barSizeRight).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
+	}
+	return rightBar
+}
 
 func (m GameModel) ShowStats() string {
-	mapLevel := fmt.Sprintf("Map Level: %v\n", m.gameState.MapInfo.Level)
-	healthInfo := fmt.Sprintf("Current Health: %v/%v\n", m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth)
+	playerLevel := fmt.Sprintf("Player Level: %v\nXP: %v/10\n", m.gameState.Stats.PlayerLevel, m.gameState.Stats.XPGained)
+	mapLevel := fmt.Sprintf("Floor: %v\n", m.gameState.MapInfo.Level)
 	potionCount := 0
 	for _, item := range m.gameState.Stats.Inventory {
 		if item.Type == game.HealthPotion {
 			potionCount++
 		}
 	}
-	charStats := fmt.Sprintf("Gold: %v\n\nAttack Damage: %v\nCrit Chance: %v%%\nCrit Multi: %vx\n\n\n", m.gameState.Stats.Gold, m.gameState.Stats.BaseDmg, m.gameState.Stats.CritChance, m.gameState.Stats.BaseCritMulti)
-	xpInfo := fmt.Sprintf("XP %v/10\n\n%v", m.gameState.Stats.XPGained, m.LevelMsg)
+	charStats := fmt.Sprintf("\nAttack Damage: %v\nCrit Chance: %v%%\nCrit Multi: %vx\n", m.gameState.Stats.BaseDmg, m.gameState.Stats.CritChance, m.gameState.Stats.BaseCritMulti)
+	goldCount := fmt.Sprintf("Gold: %v\n", m.gameState.Stats.Gold)
+	xpInfo := fmt.Sprintf("\n%v", m.LevelMsg)
 	potionsAvailable := fmt.Sprintf("Potions Available: %v\n\n\n", potionCount)
 	if potionCount > 0 {
-		potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 5 health! Potions Available: %v\n\n\n", potionCount)
+		if m.gameState.Stats.CurrentHealth >= m.gameState.Stats.MaxHealth {
+			potionsAvailable = fmt.Sprintf("Use P to drink potion and overheal for 3 health! Potions Available: %v\n", potionCount)
+		} else {
+			potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 6 health! Potions Available: %v\n", potionCount)
+		}
 	}
-	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, healthInfo, charStats, xpInfo, potionsAvailable)
+	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, xpInfo)
 
 }
 func (m *GameModel) AddMessage(msg string) {
 	if msg == "" {
 		return
 	}
-	m.MessageLog = append(m.MessageLog, msg)
-	const maxMessages = 6
+	m.MessageLog = append(m.MessageLog, msg+"\n")
+	const maxMessages = 5
 	if len(m.MessageLog) > maxMessages {
 		m.MessageLog = m.MessageLog[len(m.MessageLog)-maxMessages:]
 	}

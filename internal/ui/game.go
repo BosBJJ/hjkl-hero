@@ -62,6 +62,7 @@ type GameModel struct {
 }
 
 type RunStats struct {
+	PlayerLevel int
 	Kills       int
 	TotalXp     int
 	TotalMoves  int
@@ -70,30 +71,31 @@ type RunStats struct {
 }
 
 func (m GameModel) ViewGame() string {
-	height, width := game.GetMapSize(m.gameState)
-	helpMenu := "Type :help to display help menu"
-	if m.HelpMenu == true {
-		helpMenu = GetHelpMenu()
-	}
-	termInfo := fmt.Sprintf(
-		"Terminal: %dx%d\nCamera: %dx%d\nMap: %dx%d",
-		m.width, m.height,
-		m.camera.Width, m.camera.Height,
-		height, width,
-	)
-	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\n\n%v",
-		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), termInfo)
 	barSizeLeft := int(float64(m.width) * 0.18)
 	barSizeRight := int(float64(m.width) * 0.24)
+	lowBar := m.width - barSizeLeft - barSizeRight
 	currentMap := render.Render(m.gameState, m.camera, m.SelectedTheme)
 	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
-	stats := m.ShowStats()
-	messages := m.ShowMessages()
-	leftBar := lipgloss.NewStyle().Width(barSizeLeft).Render(lipgloss.JoinVertical(lipgloss.Left, stats, messages))
-	center := lipgloss.NewStyle().Width(m.camera.Width).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, editorInfo))
-	rightBar := lipgloss.NewStyle().Width(barSizeRight).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
-	if m.DebugMenu {
-		rightBar = lipgloss.NewStyle().Width(barSizeRight).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
+	editorStyle := lipgloss.NewStyle().Width(30)
+	healthInfo := DisplayHealth(m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth)
+	bottomBar := lipgloss.NewStyle().Width(lowBar).Render(lipgloss.JoinHorizontal(
+		lipgloss.Left,
+		editorStyle.Render(editorInfo),
+		editorStyle.Render("   "),
+		healthInfo,
+	))
+	leftBar := m.displayLeftPanel()
+	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
+	rightBar := m.displayRightPanel()
+	if m.height <= 27 {
+		leftBar = ""
+		rightBar = ""
+		center = "Please increase your terminal height"
+	}
+	if m.width <= 156 {
+		leftBar = ""
+		rightBar = ""
+		center = "Please increase your terminal width"
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 

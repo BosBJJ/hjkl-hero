@@ -1,13 +1,34 @@
 package game
 
-func (gs *GameState) DropPotion(line, col int) {
-	newPotion := Item{
-		Type:   HealthPotion,
+import (
+	"fmt"
+	"math/rand/v2"
+	"strings"
+
+	"github.com/BosBJJ/hjkl-hero/internal/levels"
+)
+
+func (gs *GameState) DropItem(line, col, amount int, itemType ItemType) {
+	newItem := Item{
+		Type:   itemType,
 		Line:   line,
 		Col:    col,
-		Amount: 1,
+		Amount: amount,
 	}
-	gs.Items = append(gs.Items, newPotion)
+	gs.Items = append(gs.Items, newItem)
+}
+
+func (gs *GameState) DropPotion(line, col int) {
+	gs.DropItem(line, col, 1, HealthPotion)
+}
+
+func (gs *GameState) DropGold(line, col int) int {
+	goldValue := rand.IntN(15)
+	if goldValue == 0 {
+		goldValue = 1
+	}
+	gs.DropItem(line, col, goldValue, Gold)
+	return goldValue
 }
 
 func (gs *GameState) GrabItem() {
@@ -25,10 +46,14 @@ func (gs *GameState) GrabItem() {
 	}
 }
 
-func (gs *GameState) UsePotion() { //Currently can overheal, maybe let it overheal but half strength or turn into shield
+func (gs *GameState) UsePotion() {
 	for i, item := range gs.Stats.Inventory {
 		if item.Type == HealthPotion {
-			gs.Stats.CurrentHealth += 5
+			if gs.Stats.CurrentHealth >= gs.Stats.MaxHealth {
+				gs.Stats.CurrentHealth += 3
+			} else {
+				gs.Stats.CurrentHealth += 6
+			}
 			gs.Stats.Inventory = append(gs.Stats.Inventory[:i], gs.Stats.Inventory[i+1:]...)
 			return
 		}
@@ -42,4 +67,23 @@ func (gs GameState) ItemAt(line, col int) (Item, bool) {
 		}
 	}
 	return Item{}, false
+}
+
+func (gs *GameState) OpenChest(line, col int) string {
+	obtained := ""
+	mapLines := ToLines(*gs)
+	levels.ReplaceTile(mapLines, line, col, '.')
+	gs.MapInfo.LevelMap = levels.LevelMap(strings.Join(mapLines, "\n"))
+	roll := rand.IntN(4)
+	switch roll {
+	case 4, 3:
+		gs.DropPotion(line, col)
+		gs.GrabItem()
+		obtained = "Obtained health potion from chest"
+	default:
+		gold := gs.DropGold(line, col)
+		gs.GrabItem()
+		obtained = fmt.Sprintf("Obtained %v gold from chest", gold)
+	}
+	return obtained
 }

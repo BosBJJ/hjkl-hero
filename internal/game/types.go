@@ -27,6 +27,7 @@ type PlayerInfo struct {
 	DamageTaken   int
 	Inventory     []Item
 	Gold          int
+	PlayerLevel   int
 }
 
 type SnapShot struct {
