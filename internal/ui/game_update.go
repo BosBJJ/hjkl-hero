@@ -34,6 +34,17 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if m.MerchantMode {
+			switch msg.String() {
+			case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+				merchMsg, closeShop := m.gameState.UseMerchant(int(msg.String()[0] - '0'))
+				m.AddMessage(merchMsg)
+				if closeShop {
+					m.MerchantMode = false
+				}
+			}
+			return m, nil
+		}
 		switch msg.String() {
 		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
 			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
@@ -54,7 +65,11 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
 				m.AddMessage("You have found a chest! Press SPACE to go unlock it!")
 			}
-			m.gameState.GrabItem()
+			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
+				m.AddMessage("Press SPACE to trade merchant!")
+			}
+			grabbed := m.gameState.GrabItem()
+			m.AddMessage(grabbed)
 		case "w":
 			m.gameState.JumpToNext()
 		case "W":
@@ -128,6 +143,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
 				obtained := m.gameState.OpenChest(m.gameState.Player.Line, m.gameState.Player.Column)
 				m.AddMessage(obtained)
+			}
+			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
+				m.MerchantMode = true
 			}
 		}
 	}
@@ -236,12 +254,17 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 			return m, nil
 		case "cheat":
 			m.gameState.Stats.XPGained += 10
+			m.gameState.Stats.CurrentHealth += 10
 		case "help":
 			m.HelpMenu = !m.HelpMenu
 			m.CmdText = ""
 			m.EditorMode = NormalMode
 		case "debug":
 			m.DebugMenu = !m.DebugMenu
+			m.CmdText = ""
+			m.EditorMode = NormalMode
+		case "hideUI":
+			m.HideUI = !m.HideUI
 			m.CmdText = ""
 			m.EditorMode = NormalMode
 		default:

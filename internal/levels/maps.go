@@ -192,11 +192,6 @@ func CarveRoom(tileMap [][]rune, room Room) {
 	}
 }
 
-// MATH - ensures at least 1 tile between rooms
-func (r Room) RoomOverlap(new Room) bool {
-	return r.X1-1 < new.X2 && r.X2+1 > new.X1 && r.Y1-1 < new.Y2 && r.Y2+1 > new.Y1
-}
-
 // Marks borders of each room, ensures no collision
 func MakeRooms(count int, tileMap [][]rune) []Room {
 	var rooms []Room
@@ -222,10 +217,8 @@ func MakeRooms(count int, tileMap [][]rune) []Room {
 
 // Uses "Drunkards walk", carves out one tile, then either continues towards target or stumbles into a random direction
 func ConnectRooms(r1, r2 Room, tileMap [][]rune) {
-	wX := (r1.X1 + r1.X2) / 2
-	wY := (r1.Y1 + r1.Y2) / 2
-	targetX := (r2.X1 + r2.X2) / 2
-	targetY := (r2.Y1 + r2.Y2) / 2
+	wY, wX := r1.GetCenter()
+	targetY, targetX := r2.GetCenter()
 	for wX != targetX || wY != targetY {
 		roll := rand.Intn(101)
 		switch {
@@ -266,7 +259,8 @@ func ConnectRooms(r1, r2 Room, tileMap [][]rune) {
 	}
 }
 
-func MakeMap(height, width, numOfRooms int) LevelMap {
+// numOfRooms = 15 + level, Every 3 levels == 18,21,24,27,30
+func MakeMap(height, width, numOfRooms int) (LevelMap, bool) {
 	tileMap := generateBlock(height, width)
 	rooms := MakeRooms(numOfRooms, tileMap)
 	for i, room := range rooms {
@@ -276,6 +270,7 @@ func MakeMap(height, width, numOfRooms int) LevelMap {
 		}
 	}
 	MakeStairs(rooms, tileMap)
+	specialEvent := MakeVendor(rooms, tileMap)
 	MakeChest(rooms, tileMap)
 	if numOfRooms > 20 {
 		MakeChest(rooms, tileMap)
@@ -288,7 +283,7 @@ func MakeMap(height, width, numOfRooms int) LevelMap {
 		newMap.WriteByte('\n')
 	}
 
-	return LevelMap(newMap.String())
+	return LevelMap(newMap.String()), specialEvent
 }
 
 func MakeStairs(rooms []Room, tileMap [][]rune) {
@@ -306,6 +301,21 @@ func MakeChest(rooms []Room, tileMap [][]rune) {
 		y := rand.Intn(room.Y2-room.Y1) + room.Y1
 		tileMap[y][x] = '+'
 	}
+}
+
+func MakeVendor(rooms []Room, tileMap [][]rune) bool {
+	roll := rand.Intn(100)
+	if roll < 30 {
+		for _, room := range rooms {
+			height, width := room.GetRoomSize()
+			if height > 10 && width > 10 {
+				y, x := room.GetCenter()
+				tileMap[y][x] = '$'
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func ReplaceTile(mapLines []string, line, col int, input rune) {

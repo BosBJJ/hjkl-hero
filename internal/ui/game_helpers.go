@@ -26,7 +26,11 @@ func (m *GameModel) LevelUp() {
 		height = 60 + (level-1)*2
 		width = 80 + (level-1)*4
 		rooms = 15 + level
-		m.gameState.MapInfo.LevelMap = levels.MakeMap(height, width, rooms)
+		gameMap, specialEvent := levels.MakeMap(height, width, rooms)
+		m.gameState.MapInfo.LevelMap = gameMap
+		if specialEvent {
+			m.AddMessage("Special event found on this floor!")
+		}
 		m.gameState.MapInfo.MapType = game.RoomMap
 	}
 	m.gameState.Enemies = nil
@@ -148,6 +152,7 @@ func GetHelpMenu() string {
 		"  :w       - Check level completion",
 		"  :wq      - Complete and continue",
 		"  :help    - Toggle help menu",
+		"  :hideUI  - Hides side panels",
 		"  :debug   - Toggle debug info"}
 
 	return strings.Join(sections, "\n")
@@ -166,13 +171,13 @@ func DisplayHealth(currHP, maxHP int) string {
 func (gs *GameModel) makePanel() lipgloss.Style {
 	colors := style.MakePanelColor(gs.SelectedTheme)
 	return lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
+		Border(lipgloss.NormalBorder()).
+		BorderForeground(style.GetColor(colors.WallColor)).
+		BorderBackground(style.GetColor(colors.WallColor)).
 		Background(style.GetColor(colors.WallColor)).
 		Padding(1).
-		BorderForeground(style.GetColor(colors.FloorColor)).
 		Foreground(style.GetColor(colors.FloorColor)).
 		Bold(true)
-
 }
 
 func (m GameModel) displayLeftPanel() string {
@@ -180,7 +185,7 @@ func (m GameModel) displayLeftPanel() string {
 	barSizeLeft := int(float64(m.width) * 0.18)
 	stats := m.ShowStats()
 	messages := m.ShowMessages()
-	leftBar := panelcolors.Width(barSizeLeft).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Left, stats, "Game Messages", "-----------------------------", messages))
+	leftBar := panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, stats, "Game Messages", "-----------------------------", messages))
 	return leftBar
 }
 
@@ -200,10 +205,18 @@ func (m GameModel) displayRightPanel() string {
 	)
 	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
 		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
-	rightBar := panelcolors.Width(barSizeRight).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
+	rightBar := panelcolors.Width(barSizeRight).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
 	if m.DebugMenu {
 		rightBar = panelcolors.Width(barSizeRight).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
 	}
+	return rightBar
+}
+
+func (m GameModel) displayShop() string {
+	panelcolors := m.makePanel()
+	barSizeRight := int(float64(m.width) * 0.20)
+	options := []string{"1. Health Potion - 15 Gold", "2. 10 XP - 40 Gold", "3. Leave Shop"}
+	rightBar := panelcolors.Width(barSizeRight).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, options...))
 	return rightBar
 }
 

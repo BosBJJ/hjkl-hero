@@ -31,19 +31,23 @@ func (gs *GameState) DropGold(line, col int) int {
 	return goldValue
 }
 
-func (gs *GameState) GrabItem() {
+func (gs *GameState) GrabItem() string {
+	grabbedItem := ""
 	for i, item := range gs.Items {
 		if item.Col == gs.Player.Column && item.Line == gs.Player.Line {
 			switch item.Type {
 			case Gold:
 				gs.Stats.Gold += item.Amount
-			default:
+				grabbedItem = fmt.Sprintf("Collected %v gold", item.Amount)
+			default: //Only other item is potions at the moment,add more switches later
 				gs.Stats.Inventory = append(gs.Stats.Inventory, item)
+				grabbedItem = "Collected 1 potion"
 			}
 			gs.Items = append(gs.Items[:i], gs.Items[i+1:]...)
-			return
+			return grabbedItem
 		}
 	}
+	return grabbedItem
 }
 
 func (gs *GameState) UsePotion() {
@@ -78,12 +82,33 @@ func (gs *GameState) OpenChest(line, col int) string {
 	switch roll {
 	case 4, 3:
 		gs.DropPotion(line, col)
-		gs.GrabItem()
-		obtained = "Obtained health potion from chest"
+		obtained = gs.GrabItem()
 	default:
-		gold := gs.DropGold(line, col)
-		gs.GrabItem()
-		obtained = fmt.Sprintf("Obtained %v gold from chest", gold)
+		gs.DropGold(line, col)
+		obtained = gs.GrabItem()
 	}
 	return obtained
+}
+
+// Add more options in the future, items instead of potion + xp
+func (gs *GameState) UseMerchant(option int) (string, bool) {
+	switch option {
+	case 1:
+		if gs.Stats.Gold < 15 {
+			return "Not Enough Gold", false
+		}
+		gs.Stats.Gold -= 15
+		gs.Stats.Inventory = append(gs.Stats.Inventory, Item{Type: HealthPotion})
+		return "Bought a health potion", false
+	case 2:
+		if gs.Stats.Gold < 40 {
+			return "Not Enough Gold", false
+		}
+		gs.Stats.Gold -= 40
+		gs.Stats.TotalXP += 10
+		gs.Stats.XPGained += 10
+		return "10 XP purchased", false
+	default:
+		return "Good luck!", true
+	}
 }

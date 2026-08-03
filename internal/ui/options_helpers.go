@@ -159,9 +159,9 @@ func renderDemo(theme storage.Theme) string {
 ###...M.............M##############
 ###...^###########.......##########
 ###..#############..###.....C.#####
-###.....+#########....#......######
-###.............#....##############
-###.........@..M#.Z..##############
+###.....+#########....#$.....######
+###..$..........#....##############
+###......$..@..M#.Z..##############
 ###....^........#....C........@####
 ###.....+.......+...#.....Z########
 ###@.M.Z.C..........#....##########
@@ -198,6 +198,8 @@ func renderDemo(theme storage.Theme) string {
 				renderedDemo.WriteString(style.StairStyle.Render("^"))
 			case tile == '+':
 				renderedDemo.WriteString(style.ChestStyle.Render("\u2317"))
+			case tile == '$':
+				renderedDemo.WriteString(style.VendorStyle.Render("$"))
 			default:
 				renderedDemo.WriteRune(tile)
 			}

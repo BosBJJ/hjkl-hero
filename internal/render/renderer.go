@@ -65,8 +65,11 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 					rendered.WriteString(style.ZanthStyle.Render("Z"))
 				}
 			case isItem:
-				if item.Type == game.HealthPotion {
+				switch item.Type {
+				case game.HealthPotion:
 					rendered.WriteString(style.PotionStyle.Render("P"))
+				case game.Gold:
+					rendered.WriteString(style.VendorStyle.Render("C"))
 				}
 			case rune == '.':
 				if gs.MapInfo.MapType == game.EditorMap {
@@ -78,6 +81,8 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 				rendered.WriteString(style.StairStyle.Render("^"))
 			case rune == '+': //Chest
 				rendered.WriteString(style.ChestStyle.Render("\u233A"))
+			case rune == '$': //Vendor
+				rendered.WriteString(style.VendorStyle.Render("$"))
 			default:
 				if gs.MapInfo.MapType == game.EditorMap {
 					rendered.WriteString(string(rune))

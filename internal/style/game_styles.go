@@ -32,9 +32,13 @@ var ChestStyle = lipgloss.NewStyle().
 	Background(Brown).
 	Foreground(Golden)
 
+var VendorStyle = lipgloss.NewStyle().
+	Background(Golden).
+	Foreground(Black)
+
 // Health Styles
 var HealthBase = lipgloss.NewStyle().
-	Border(lipgloss.RoundedBorder()).
+	Border(lipgloss.NormalBorder()).
 	Width(30).
 	Height(1).
 	Align(lipgloss.Center).
@@ -43,12 +47,15 @@ var HealthBase = lipgloss.NewStyle().
 var FullHealth = HealthBase.
 	Background(Green).
 	BorderForeground(Green).
+	BorderBackground(Green).
 	Foreground(Magenta)
 var LowerHealth = HealthBase.
 	Background(Yellow).
 	BorderForeground(Yellow).
+	BorderBackground(Yellow).
 	Foreground(Magenta)
 var LowHealth = HealthBase.
 	Background(Red).
 	BorderForeground(Red).
+	BorderBackground(Red).
 	Foreground(White)

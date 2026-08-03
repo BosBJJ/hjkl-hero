@@ -25,9 +25,10 @@ func MakeDefaultGameModel() GameModel {
 }
 
 func MakeRogueLikeGameModel() GameModel {
+	gameMap, _ := levels.MakeMap(60, 80, 15)
 	info := game.MapInfo{
 		Level:    1,
-		LevelMap: levels.MakeMap(60, 80, 15),
+		LevelMap: gameMap,
 		MapType:  game.RoomMap,
 	}
 	gs := game.GameState{
@@ -59,6 +60,8 @@ type GameModel struct {
 	SelectedTheme storage.ThemeID
 	HelpMenu      bool
 	DebugMenu     bool
+	HideUI        bool
+	MerchantMode  bool
 }
 
 type RunStats struct {
@@ -81,12 +84,18 @@ func (m GameModel) ViewGame() string {
 	bottomBar := lipgloss.NewStyle().Width(lowBar).Render(lipgloss.JoinHorizontal(
 		lipgloss.Left,
 		editorStyle.Render(editorInfo),
-		editorStyle.Render("   "),
+		editorStyle.Render(""),
 		healthInfo,
 	))
 	leftBar := m.displayLeftPanel()
 	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
+	if m.gameState.MapInfo.MapType == game.EditorMap {
+		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar))
+	}
 	rightBar := m.displayRightPanel()
+	if m.MerchantMode {
+		rightBar = m.displayShop()
+	}
 	if m.height <= 27 {
 		leftBar = ""
 		rightBar = ""
@@ -96,6 +105,10 @@ func (m GameModel) ViewGame() string {
 		leftBar = ""
 		rightBar = ""
 		center = "Please increase your terminal width"
+	}
+	if m.HideUI {
+		leftBar = lipgloss.NewStyle().Width(barSizeLeft).Render("")
+		rightBar = lipgloss.NewStyle().Width(barSizeRight).Render("use :hideUI to bring back panels")
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 

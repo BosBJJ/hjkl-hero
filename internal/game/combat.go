@@ -100,13 +100,28 @@ func (gs *GameState) MeleeAttack() CombatLog {
 
 func (gs *GameState) GetLootFromKill(line, col int, style AttackType) { //Future- add character class
 	dropChance := rand.IntN(100)
-	switch style {
-	case Melee:
-		gs.DropPotion(line, col)
-	case Ranged:
-		if dropChance > 50 {
+	loot := PickRandomItem()
+	switch loot {
+	case HealthPotion:
+		if style == Melee {
 			gs.DropPotion(line, col)
+		} else {
+			if dropChance > 50 {
+				gs.DropPotion(line, col)
+			}
 		}
+	case Gold:
+		gs.DropGold(line, col)
+	}
+}
+
+func PickRandomItem() ItemType {
+	roll := rand.IntN(3)
+	switch roll {
+	case 2:
+		return HealthPotion
+	default:
+		return Gold
 	}
 }
 
