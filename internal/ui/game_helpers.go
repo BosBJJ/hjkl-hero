@@ -19,6 +19,7 @@ func (m *GameModel) LevelUp() {
 	switch m.GameType {
 	case storage.TutorialMode:
 		m.gameState.MapInfo = game.GetMapInfo(nextLevel)
+		m.gameState.Stats.Gold += 20
 	case storage.RogueLikeMode:
 		m.gameState.MapInfo.Level++
 		level := m.gameState.MapInfo.Level
@@ -186,6 +187,9 @@ func (m GameModel) displayLeftPanel() string {
 	stats := m.ShowStats()
 	messages := m.ShowMessages()
 	leftBar := panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, stats, "Game Messages", "-----------------------------", messages))
+	if m.gameState.MapInfo.MapType == game.EditorMap {
+		leftBar = panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, "Game Messages", "-----------------------------", messages))
+	}
 	return leftBar
 }
 

@@ -233,8 +233,9 @@ func (m SettingsModel) getStylePickerMenu() string {
 	styleView := renderDemo(style.Themes[m.ThemeSelected])
 	leftBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
 	center := lipgloss.NewStyle().Width(m.width - barSize - barSize).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, styleView))
-	//rightBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
-	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center)
+	info := "*, @, \u2E38,\u25B2 - Player\n$ - merchant\n\u233A - chest\n^ - stairs\nZ - tank\n9 - Chaser\nM - Meleer"
+	rightBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Center, info))
+	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 }
 
 func (m SettingsModel) getCustomThemeEditor() string {

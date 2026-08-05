@@ -42,6 +42,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 				if closeShop {
 					m.MerchantMode = false
 				}
+				if m.gameState.Stats.XPGained >= 10 {
+					m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+				}
 			}
 			return m, nil
 		}
@@ -59,13 +62,13 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			chase := m.gameState.ChasePlayer()
 			m.AddMessage(chase)
 			m.CheckGameState()
-			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
+			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
 				m.AddMessage("You have reached the stairs! Press SPACE to go to next floor!")
 			}
-			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
+			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
 				m.AddMessage("You have found a chest! Press SPACE to go unlock it!")
 			}
-			if m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
+			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
 				m.AddMessage("Press SPACE to trade merchant!")
 			}
 			grabbed := m.gameState.GrabItem()

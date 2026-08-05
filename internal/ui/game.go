@@ -87,6 +87,12 @@ func (m GameModel) ViewGame() string {
 		editorStyle.Render(""),
 		healthInfo,
 	))
+	if m.gameState.MapInfo.MapType == game.EditorMap {
+		bottomBar = lipgloss.NewStyle().Width(lowBar).Render(lipgloss.JoinHorizontal(
+			lipgloss.Left,
+			editorStyle.Render(editorInfo),
+		))
+	}
 	leftBar := m.displayLeftPanel()
 	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
 	if m.gameState.MapInfo.MapType == game.EditorMap {
