@@ -62,6 +62,7 @@ func (m GameOverModel) updateMenu(msg tea.Msg) (GameOverModel, tea.Cmd) {
 				return m, nil
 			} else {
 				m.Selected = m.Cursor
+				m.Cursor = 0
 			}
 		}
 	}

@@ -87,16 +87,17 @@ func (m GameModel) ViewGame() string {
 		editorStyle.Render(""),
 		healthInfo,
 	))
+	leftBar := m.displayLeftPanel()
+	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
 	if m.gameState.MapInfo.MapType == game.EditorMap {
 		bottomBar = lipgloss.NewStyle().Width(lowBar).Render(lipgloss.JoinHorizontal(
 			lipgloss.Left,
 			editorStyle.Render(editorInfo),
 		))
-	}
-	leftBar := m.displayLeftPanel()
-	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
-	if m.gameState.MapInfo.MapType == game.EditorMap {
-		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar))
+		hint := "\n\n Once your text above looks like the answer below use :w, make sure to always check the game messages"
+		answer := "\n------------------------------------------------------------------------"
+		solution := levels.GetAnswer(m.gameState.MapInfo.Level)
+		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint,answer, string(solution)))
 	}
 	rightBar := m.displayRightPanel()
 	if m.MerchantMode {

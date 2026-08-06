@@ -136,25 +136,25 @@ func GetHelpMenu() string {
 
 		"",
 		"Actions",
-		"  X        - Delete / Melee ATK",
-		"  D        - Delete Mode / Ranged ATK",
-		"  R        - Replace Mode / Level Up",
-		"  P        - Drink Health Potion",
+		"  X       - Delete / Melee ATK",
+		"  D       - Delete Mode / Ranged ATK",
+		"  R       - Replace Mode / Level Up",
+		"  P       - Drink Health Potion",
 
 		"",
 		"Counts",
-		"  5j       - Move down 5 lines",
-		"  3x       - Delete 3 characters",
+		"  5j      - Move down 5 lines",
+		"  3x      - Delete 3 characters",
 
 		"",
 		"Commands",
-		"  :q       - End current game",
-		"  :q!      - Quit immediately",
-		"  :w       - Check level completion",
-		"  :wq      - Complete and continue",
-		"  :help    - Toggle help menu",
-		"  :hideUI  - Hides side panels",
-		"  :debug   - Toggle debug info"}
+		"  :q      - End current game",
+		"  :q!     - Quit immediately",
+		"  :w      - Check level completion",
+		"  :wq     - Complete and continue",
+		"  :help   - Toggle help menu",
+		"  :hideUI - Hides side panels",
+		"  :debug  - Toggle debug info"}
 
 	return strings.Join(sections, "\n")
 

@@ -19,10 +19,10 @@ type LevelMap string
 var Maps = map[int]LevelMap{
 	1: `
  Use H J K L to move around, your goal is to get to
- the bottom row and get to the symbol "*" at the very end and then
+ the fourth row and get to the symbol "*" in the middle and then
  use "r" which will replace under the cursor.
  Use "l" to get to the * and replace it with a "#"
- Type : to enter command mode and then w, this normally
+ Type ":" to enter command mode and then "w", press enter to use it, this normally
  just saves in the editor but we use it to check if we're done`,
 	2: `
  It was pretty annoying to just hold J to get to
@@ -31,19 +31,19 @@ var Maps = map[int]LevelMap{
  ability to use numbers to multiply
  how many times your next action is used
  This line is already 5 rows lower than the start
- To get to this line quickly you can press 6 and then j, delete the "*" by pressing x`,
+ To get to this line quickly you can press "6" and then "j", delete the "*" by pressing "x"`,
 	3: `
- Now we're gonna introduce w/b/e, use w to jump to * and delete it
- then *come down to this line (you should be at the end) and use b to jump to come
- now we're at this line and need to delete the unnecessary* again, press e to jump to the end of words
+ Now we're gonna introduce w/b/e, use "w" to jump to * and delete it
+ then *come down to this line (you should be inside here) and use "b" to jump to come
+ now we're at this line and need to delete the unnecessary* again, press "e" to jump to the end of words
  with vim motions using SHIFT before actions will cause them do act differently,
- capital W will skip to the complete new word and ignore punctuation so skip,this,phrase *with W
- Same *applies,to,using capital B, it takes you to the beginning of a word ignoring punctuation
- and with E it,also,does,the,same,thing,but,goes,to,the,end*`,
+ capital "W" will skip to the complete new word and ignore punctuation so skip,this,phrase *with "W"
+ Same *applies,to,using capital "B", it takes you to the beginning of a word ignoring punctuation
+ and with "E" it,also,does,the,same,thing,but,goes,to,the,end*`,
 	4: `
  There's a very easy way to jump to the beginning and end of a row
- to get to the very end of a row all you have to do is press $*
- *and to jump to the first character/rune just press 0*
+ to get to the very end of a row all you have to do is press "$"*
+ *and to jump to the first character/rune just press "0"*
  use these to erase the different places you see a "*"`,
 	5: `
  Now we're going to learn how to use delete
@@ -55,11 +55,11 @@ var Maps = map[int]LevelMap{
  When you're done playing around just undo everything and save the map with the asterisk line deleted`,
 	6: `
  That's all for the current tutorial maps, more to be made in the future
- Now if you want to use the new keys you learned a lot in a game setting you can press :wq and
+ Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.
  The enemies take one action per one of your actions,
  if you are about to be hit you can use a number + direction and
- skip in that direction freely, use :help to see all of the commands available
+ skip in that direction freely, use ":help" to see all of the commands available
  If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
  harder and has procedurally generated maps`,
 
@@ -99,10 +99,10 @@ var Maps = map[int]LevelMap{
 var AnswerMap = map[int]LevelMap{
 	1: `
  Use H J K L to move around, your goal is to get to
- the bottom row and get to the symbol "*" at the very end and then
+ the fourth row and get to the symbol "*" in the middle and then
  use "r" which will replace under the cursor.
  Use "l" to get to the # and replace it with a "#"
- Type : to enter command mode and then w, this normally
+ Type ":" to enter command mode and then "w", press enter to use it, this normally
  just saves in the editor but we use it to check if we're done`,
 	2: `
  It was pretty annoying to just hold J to get to
@@ -111,19 +111,19 @@ var AnswerMap = map[int]LevelMap{
  ability to use numbers to multiply
  how many times your next action is used
  This line is already 5 rows lower than the start
- To get to this line quickly you can press 6 and then j, delete the "" by pressing x`,
+ To get to this line quickly you can press "6" and then "j", delete the "" by pressing "x"`,
 	3: `
- Now we're gonna introduce w/b/e, use w to jump to  and delete it
- then come down to this line (you should be at the end) and use b to jump to come
- now we're at this line and need to delete the unnecessary again, press e to jump to the end of words
+ Now we're gonna introduce w/b/e, use "w" to jump to  and delete it
+ then come down to this line (you should be inside here) and use "b" to jump to come
+ now we're at this line and need to delete the unnecessary again, press "e" to jump to the end of words
  with vim motions using SHIFT before actions will cause them do act differently,
- capital W will skip to the complete new word and ignore punctuation so skip,this,phrase with W
- Same applies,to,using capital B, it takes you to the beginning of a word ignoring punctuation
- and with E it,also,does,the,same,thing,but,goes,to,the,end`,
+ capital "W" will skip to the complete new word and ignore punctuation so skip,this,phrase with "W"
+ Same applies,to,using capital "B", it takes you to the beginning of a word ignoring punctuation
+ and with "E" it,also,does,the,same,thing,but,goes,to,the,end`,
 	4: `
  There's a very easy way to jump to the beginning and end of a row
- to get to the very end of a row all you have to do is press $
- and to jump to the first character/rune just press 0
+ to get to the very end of a row all you have to do is press "$"
+ and to jump to the first character/rune just press "0"
  use these to erase the different places you see a ""`,
 	5: `
  Now we're going to learn how to use delete
@@ -134,11 +134,11 @@ var AnswerMap = map[int]LevelMap{
  When you're done playing around just undo everything and save the map with the asterisk line deleted`,
 	6: `
  That's all for the current tutorial maps, more to be made in the future
- Now if you want to use the new keys you learned a lot in a game setting you can press :wq and
+ Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.
  The enemies take one action per one of your actions,
  if you are about to be hit you can use a number + direction and
- skip in that direction freely, use :help to see all of the commands available
+ skip in that direction freely, use ":help" to see all of the commands available
  If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
  harder and has procedurally generated maps`,
 }
