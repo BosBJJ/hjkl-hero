@@ -32,10 +32,11 @@ I develop and test the game using JetBrains Mono, so it is the recommended font.
 - XP/Leveling system with a leaderboard to track stats.
 
 ## Installation
-### Download a Release (Recommended)
+### Download and Play (Recommended)
 
-Download the latest prebuilt binary for your operating system from the
-[Releases](https://github.com/BosBJJ/hjkl-hero/releases) page.
+Download the latest prebuilt binary for your operating system from:
+- [GitHub Releases](https://github.com/BosBJJ/hjkl-hero/releases)
+- [itch.io](https://sbrlabworks.itch.io/hjkl-hero)
 
 Extract the archive and add the executable to your `PATH`, or run it directly.
 
