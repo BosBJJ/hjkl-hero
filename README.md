@@ -13,7 +13,7 @@ A terminal based Vim motion game.
 ## Motivation
 
 I started playing around with Vim motions and saw there were games and tutorials but they were either too slow to get to the point or simply were too easy, so I thought
-why not just get used to using them while making a game to hopefully help others?
+why not learn by building a game that I'd enjoy playing, while giving others another way to practice?
 
 ## Terminal Recommendations
 ### Recommended Font
@@ -32,7 +32,14 @@ I develop and test the game using JetBrains Mono, so it is the recommended font.
 - XP/Leveling system with a leaderboard to track stats.
 
 ## Installation
-### For Users
+### Download a Release (Recommended)
+
+Download the latest prebuilt binary for your operating system from the
+[Releases](https://github.com/BosBJJ/hjkl-hero/releases) page.
+
+Extract the archive and add the executable to your `PATH`, or run it directly.
+
+### Install with Go
 Install the binary directly to your `GOBIN`:
 ```bash
 go install github.com/BosBJJ/hjkl-hero@latest
