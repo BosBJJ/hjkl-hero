@@ -10,6 +10,8 @@ A terminal based Vim motion game.
 
 ![Rogue Mode Example](screenshots/RogueMode.png)
 
+![Theme Editor](screenshots/ThemeEditor.png)
+
 ## Motivation
 
 I started playing around with Vim motions and saw there were games and tutorials but they were either too slow to get to the point or simply were too easy, so I thought
