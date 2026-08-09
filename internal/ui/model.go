@@ -46,15 +46,19 @@ func NewModel(db *sql.DB) Model {
 		panic(err)
 	}
 	var game GameModel
+	menu := MakeMenu()
 	switch settings.GameMode {
 	case storage.TutorialMode:
+		menu.SelectedMode = storage.TutorialMode
 		game = MakeDefaultGameModel()
 	case storage.RogueLikeMode:
+		menu.SelectedMode = storage.RogueLikeMode
 		game = MakeRogueLikeGameModel()
 	}
+
 	game.SelectedTheme = settings.ThemeID
 	return Model{
-		Menu:            MakeMenu(),
+		Menu:            menu,
 		Game:            game,
 		GameOver:        MakeGameOver(),
 		Settings:        MakeSettingsModel(db, settings),
@@ -166,6 +170,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.HighScores.Scores = hs
 				m.Screen = HighScoresScreen
 				m.GameOver.Selected = -1
+				m.GameOver.PlayerName = "Player"
 			case 1:
 				m.Screen = MainMenuScreen
 				m.GameOver.Selected = -1
@@ -180,6 +185,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Settings.Selected = -1
 			}
 			m.CurrentSettings.GameMode = m.Settings.ModeSelected
+			m.Menu.SelectedMode = m.Settings.ModeSelected
 			m.Game.SelectedTheme = m.Settings.ThemeSelected
 			return m, cmd
 		case HighScoresScreen:

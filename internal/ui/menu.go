@@ -1,17 +1,21 @@
 package ui
 
 import (
+	"fmt"
+
+	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	"github.com/BosBJJ/hjkl-hero/internal/style"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type MenuModel struct {
-	width    int
-	height   int
-	Cursor   int
-	Options  []string
-	Selected int
+	width        int
+	height       int
+	Cursor       int
+	Options      []string
+	Selected     int
+	SelectedMode storage.GameMode
 }
 
 func MakeMenu() MenuModel {
@@ -55,7 +59,7 @@ func (m MenuModel) ViewMenu() string {
 	title := style.MenuTitleStyle.
 		Width(m.width).
 		Align(lipgloss.Center).
-		Render(Title) + "\n"
+		Render(Title) + "\n\n\n\n\n\n\n"
 
 	optionBoxes := []string{}
 
@@ -76,6 +80,8 @@ func (m MenuModel) ViewMenu() string {
 				Render(option)+"\n")
 		}
 	}
+	currMode := fmt.Sprintf("Current Game Mode: %v", m.SelectedMode)
+	optionBoxes = append(optionBoxes, currMode)
 	menu := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
 
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Top, "\n\n\n\n"+menu)

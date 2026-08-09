@@ -7,16 +7,15 @@ var MenuTitleStyle = lipgloss.NewStyle().
 	Bold(true)
 
 var CurrentOptionStyle = lipgloss.NewStyle().
-	Border(lipgloss.RoundedBorder()).
 	Background(Magenta).
-	BorderForeground(Green).
+	Border(lipgloss.NormalBorder()).
+	BorderBackground(Magenta).
+	BorderForeground(Magenta).
 	Foreground(Green).
 	Bold(true)
 
 var OptionsStyle = lipgloss.NewStyle().
-	Border(lipgloss.RoundedBorder()).
 	Background(Green).
-	BorderForeground(Magenta).
 	Foreground(Magenta).
 	Bold(true)
 
@@ -54,3 +53,6 @@ var EditorPanelStyle = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder()).
 	BorderForeground(GrayDark).
 	Padding(0, 1)
+
+var EmptyBorder = lipgloss.NewStyle().
+	Border(lipgloss.HiddenBorder())

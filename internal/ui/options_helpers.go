@@ -74,6 +74,13 @@ func (m *SettingsModel) updateThemePicker() {
 	}
 }
 
+func (m SettingsModel) MakeBorder() lipgloss.Style {
+	return lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		BorderBackground(style.GetColor(m.EditorMenu.Theme.WallColor)).
+		BorderForeground(style.GetColor(m.EditorMenu.Theme.FloorColor))
+}
+
 func (m SettingsModel) getOptionsMenu() string {
 	const Title = `
  ██████╗ ██████╗ ████████╗██╗ ██████╗ ███╗   ██╗███████╗
@@ -106,7 +113,7 @@ func (m SettingsModel) getOptionsMenu() string {
 				Render(option)+"\n")
 		}
 	}
-	currMode := fmt.Sprintf("Currently Selected Game Mode: %v", m.ModeSelected)
+	currMode := fmt.Sprintf("Current Game Mode: %v", m.ModeSelected)
 	optionBoxes = append(optionBoxes, currMode)
 	menu := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
 
@@ -146,7 +153,7 @@ func (m SettingsModel) getGamePickerMenu() string {
 				Render(option)+"\n")
 		}
 	}
-	currMode := fmt.Sprintf("Currently Selected Game Mode: %v", m.ModeSelected)
+	currMode := fmt.Sprintf("Current Game Mode: %v", m.ModeSelected)
 	optionBoxes = append(optionBoxes, currMode)
 	menu := lipgloss.JoinVertical(lipgloss.Center, append([]string{title}, optionBoxes...)...)
 
@@ -214,14 +221,14 @@ func (m SettingsModel) getStylePickerMenu() string {
 	optionBoxes := []string{}
 	for i, option := range themeOptions {
 		if m.Cursor == i {
-			optionBoxes = append(optionBoxes, style.CurrentOptionStyle.
+			optionBoxes = append(optionBoxes, style.EditorSelectedStyle.
 				Align(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				Width(30).
 				Height(1).
 				Render(option)+"\n")
 		} else {
-			optionBoxes = append(optionBoxes, style.OptionsStyle.
+			optionBoxes = append(optionBoxes, style.EditorItemStyle.
 				Align(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				Width(30).
@@ -231,10 +238,10 @@ func (m SettingsModel) getStylePickerMenu() string {
 	}
 	barSize := int(float64(m.width) * 0.25)
 	styleView := renderDemo(style.Themes[m.ThemeSelected])
-	leftBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
-	center := lipgloss.NewStyle().Width(m.width - barSize - barSize).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, styleView))
+	leftBar := lipgloss.NewStyle().Width(barSize).Height(m.height).AlignVertical(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
+	center := lipgloss.NewStyle().Width(m.width - barSize - barSize).Height(m.height).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, styleView))
 	info := "*, @, \u2E38,\u25B2 - Player\n$ - merchant\n\u233A - chest\n^ - stairs\nZ - tank\n9 - Chaser\nM - Meleer"
-	rightBar := lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Center, info))
+	rightBar := lipgloss.NewStyle().Width(barSize).Height(m.height).AlignVertical(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, "Legend", "--------------------", info))
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 }
 
@@ -244,11 +251,13 @@ func (m SettingsModel) getCustomThemeEditor() string {
 	styleView := renderDemo(m.EditorMenu.Theme)
 	panelHelper := ""
 	if m.EditorMenu.LeftPanel {
-		panelHelper = "Press Tab to switch panels. CURRENT PANEL - PROPERTIES"
+		panelHelper = "Press Tab to switch panels. CURRENT PANEL - PROPERTIES\n\n\n"
 	} else {
-		panelHelper = "Press Tab to switch panels. CURRENT PANEL - VALUES"
+		panelHelper = "Press Tab to switch panels. CURRENT PANEL - VALUES\n\n\n"
 	}
-	center := lipgloss.NewStyle().Width(m.width - barSize - barSize).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, styleView, panelHelper))
+	panelDemo := lipgloss.NewStyle().Foreground(style.GetColor(m.EditorMenu.Theme.FloorColor)).Background(style.GetColor(m.EditorMenu.Theme.WallColor)).Render("This text is an example of how\nthe panel colors will look")
+	info := "*, @, \u2E38,\u25B2 - Player\n$ - merchant\n\u233A - chest\n^ - stairs\nZ - tank\n9 - Chaser\nM - Meleer\n"
+	center := lipgloss.NewStyle().Width(m.width - barSize - barSize).Height(m.height).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, panelHelper, panelDemo, styleView, "Legend", "--------------------", info))
 	rightBar := m.showValues()
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
 }
@@ -264,6 +273,7 @@ var customProperties = []string{"Wall Color", "Floor Color", "Cursor Color", "Wa
 
 func (m SettingsModel) showProperties() string {
 	barSize := int(float64(m.width) * 0.25)
+	selectedBorder := m.MakeBorder()
 	optionBoxes := []string{}
 	for i, option := range customProperties {
 		if m.EditorMenu.PropertyCursor == i {
@@ -278,12 +288,16 @@ func (m SettingsModel) showProperties() string {
 				Render(option)+"\n")
 		}
 	}
-	return lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
+	if m.EditorMenu.LeftPanel {
+		return selectedBorder.Width(barSize).Height(m.height - 3).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
+	}
+	return style.EmptyBorder.Width(barSize).Height(m.height - 3).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
 }
 
 func (m SettingsModel) showValues() string {
 	colors := style.Colors
-	barSize := int(float64(m.width) * 0.25)
+	selectedBorder := m.MakeBorder()
+	barSize := int(float64(m.width)*0.25) - 3
 	optionBoxes := []string{}
 	switch m.EditorMenu.PropertyCursor {
 	case 0, 1, 2:
@@ -292,6 +306,7 @@ func (m SettingsModel) showValues() string {
 				optionBoxes = append(optionBoxes, style.EditorSelectedStyle.
 					Align(lipgloss.Center).
 					AlignVertical(lipgloss.Center).
+					Background(color.Color).
 					Render(color.Name)+"\n")
 			} else {
 				optionBoxes = append(optionBoxes, lipgloss.NewStyle().
@@ -349,7 +364,10 @@ func (m SettingsModel) showValues() string {
 			}
 		}
 	}
-	return lipgloss.NewStyle().Width(barSize).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
+	if !m.EditorMenu.LeftPanel {
+		return selectedBorder.Width(barSize - 1).Height(m.height - 3).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
+	}
+	return style.EmptyBorder.Width(barSize - 1).Height(m.height - 3).AlignVertical(lipgloss.Center).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, optionBoxes...))
 }
 
 func (m *SettingsModel) updateThemeEditor(msg tea.KeyMsg) {
