@@ -54,6 +54,9 @@ func NewModel(db *sql.DB) Model {
 	case storage.RogueLikeMode:
 		menu.SelectedMode = storage.RogueLikeMode
 		game = MakeRogueLikeGameModel()
+	case storage.NoHitMode:
+		menu.SelectedMode = storage.NoHitMode
+		game = MakeHardCoreGameModel()
 	}
 
 	game.SelectedTheme = settings.ThemeID
@@ -102,6 +105,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Game.gameState.SpawnEnemy(2)
 			case storage.RogueLikeMode:
 				m.Game.gameState.SpawnEnemy(mobCap)
+			case storage.NoHitMode:
+				m.Game.gameState.SpawnEnemy(mobCap) //current, maybe use less?
 			}
 		}
 		return m, doTick()
@@ -120,9 +125,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case storage.TutorialMode:
 					m.Game = MakeDefaultGameModel()
 					m.Game.SelectedTheme = m.Settings.ThemeSelected
+					m.Game.printInstructionsEditor()
 				case storage.RogueLikeMode:
 					m.Game = MakeRogueLikeGameModel()
 					m.Game.SelectedTheme = m.Settings.ThemeSelected
+					m.Game.printInstructionsRogue()
+				case storage.NoHitMode:
+					m.Game = MakeHardCoreGameModel()
+					m.Game.SelectedTheme = m.Settings.ThemeSelected
+					m.Game.printInstructionsHC()
 				}
 				m.Game.height = m.height
 				m.Game.width = m.width

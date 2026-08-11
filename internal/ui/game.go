@@ -16,6 +16,8 @@ func MakeDefaultGameModel() GameModel {
 		Stats:   makeBaseCharacter(),
 	}
 	gs.Player = gs.SpawnPlayer()
+	gs.Stats.MaxHealth = 100
+	gs.Stats.CurrentHealth = 100
 	return GameModel{
 		gameState:  gs,
 		EditorMode: NormalMode,
@@ -40,6 +42,29 @@ func MakeRogueLikeGameModel() GameModel {
 		gameState:  gs,
 		EditorMode: NormalMode,
 		GameType:   storage.RogueLikeMode,
+	}
+}
+
+func MakeHardCoreGameModel() GameModel {
+	gameMap, _ := levels.MakeMap(60, 80, 15)
+	info := game.MapInfo{
+		Level:    1,
+		LevelMap: gameMap,
+		MapType:  game.RoomMap,
+	}
+	hero := makeBaseCharacter()
+	hero.MaxHealth = 1
+	hero.CurrentHealth = 1
+	hero.HardCore = true
+	gs := game.GameState{
+		MapInfo: info,
+		Stats:   hero,
+	}
+	gs.Player = gs.SpawnPlayer()
+	return GameModel{
+		gameState:  gs,
+		EditorMode: NormalMode,
+		GameType:   storage.NoHitMode,
 	}
 }
 
@@ -97,7 +122,7 @@ func (m GameModel) ViewGame() string {
 		hint := "\n\n Once your text above looks like the answer below use :w, make sure to always check the game messages"
 		answer := "\n------------------------------------------------------------------------"
 		solution := levels.GetAnswer(m.gameState.MapInfo.Level)
-		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint,answer, string(solution)))
+		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, answer, string(solution)))
 	}
 	rightBar := m.displayRightPanel()
 	if m.MerchantMode {

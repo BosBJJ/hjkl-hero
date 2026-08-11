@@ -28,6 +28,7 @@ type PlayerInfo struct {
 	Inventory     []Item
 	Gold          int
 	PlayerLevel   int
+	HardCore      bool
 }
 
 type SnapShot struct {
@@ -48,6 +49,7 @@ type ItemType int
 const (
 	HealthPotion ItemType = iota
 	Gold         ItemType = iota
+	LuckyFeather ItemType = iota
 )
 
 type Item struct {

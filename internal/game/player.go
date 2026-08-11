@@ -93,6 +93,9 @@ func (gs *GameState) LevelStats(input string) {
 	}
 	switch input {
 	case "h":
+		if gs.Stats.MaxHealth == 1 {
+			return
+		}
 		gs.Stats.MaxHealth += 2
 		gs.Stats.CurrentHealth += 1
 	case "d":

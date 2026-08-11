@@ -15,6 +15,7 @@ type GameMode string
 const (
 	TutorialMode  GameMode = "tutorial"
 	RogueLikeMode GameMode = "rogue"
+	NoHitMode     GameMode = "hardcore"
 )
 
 type Theme struct {

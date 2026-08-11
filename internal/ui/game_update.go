@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/BosBJJ/hjkl-hero/internal/game"
+	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -43,7 +44,12 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 					m.MerchantMode = false
 				}
 				if m.gameState.Stats.XPGained >= 10 {
-					m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+					switch m.GameType {
+					case storage.NoHitMode:
+						m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+					default:
+						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+					}
 				}
 			}
 			return m, nil
@@ -94,7 +100,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "$":
 			m.gameState.JumpToLast()
 		case "p":
-			m.gameState.UsePotion()
+			if m.GameType != storage.NoHitMode {
+				m.gameState.UsePotion()
+			}
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				if gs.MapInfo.MapType == game.EditorMap {
@@ -107,7 +115,12 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+						switch m.GameType {
+						case storage.NoHitMode:
+							m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+						default:
+							m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+						}
 					}
 				}
 				m.TotalMoves += 1
@@ -202,7 +215,12 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 					m.AddMessage(chase)
 					m.CheckGameState()
 					if m.gameState.Stats.XPGained >= 10 {
-						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+						switch m.GameType {
+						case storage.NoHitMode:
+							m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+						default:
+							m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+						}
 					}
 				}
 				m.TotalMoves += 1
@@ -258,6 +276,9 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "cheat":
 			m.gameState.Stats.XPGained += 10
 			m.gameState.Stats.CurrentHealth += 10
+			m.gameState.Stats.Gold += 100
+		case "money":
+			m.gameState.Stats.Gold += 100
 		case "help":
 			m.HelpMenu = !m.HelpMenu
 			m.CmdText = ""
@@ -268,6 +289,15 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.EditorMode = NormalMode
 		case "hideUI":
 			m.HideUI = !m.HideUI
+			m.CmdText = ""
+			m.EditorMode = NormalMode
+		case "guide":
+			if m.gameState.MapInfo.MapType == game.EditorMap {
+				m.printInstructionsEditor()
+			}
+			if m.gameState.MapInfo.MapType == game.RoomMap {
+				m.printInstructionsRogue()
+			}
 			m.CmdText = ""
 			m.EditorMode = NormalMode
 		default:

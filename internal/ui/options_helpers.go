@@ -16,7 +16,7 @@ func (m SettingsModel) currentOptionsCount() int {
 	case OptionMenuMode:
 		return len(m.Options)
 	case GameTypePickerMode:
-		return 3
+		return 4
 	case StylePickerMode:
 		return 6
 	default:
@@ -49,6 +49,10 @@ func (m *SettingsModel) updateGamePicker() {
 		storage.UpdateGameMode(m.DB, storage.RogueLikeMode)
 	}
 	if m.Cursor == 2 {
+		m.ModeSelected = storage.NoHitMode
+		storage.UpdateGameMode(m.DB, storage.NoHitMode)
+	}
+	if m.Cursor == 3 {
 		m.OptionsMode = OptionMenuMode
 		m.Cursor = 0
 	}
@@ -135,7 +139,7 @@ func (m SettingsModel) getGamePickerMenu() string {
 		Render(Title) + "\n"
 
 	optionBoxes := []string{}
-	options := []string{"Tutorial", "Rogue", "Back"}
+	options := []string{"Tutorial", "Rogue", "Hardcore", "Back"}
 	for i, option := range options {
 		if m.Cursor == i {
 			optionBoxes = append(optionBoxes, style.CurrentOptionStyle.

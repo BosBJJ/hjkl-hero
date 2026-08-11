@@ -64,6 +64,23 @@ func (gs *GameState) UsePotion() {
 	}
 }
 
+func (gs *GameState) UseFeather() {
+	for i, item := range gs.Stats.Inventory {
+		if item.Type == LuckyFeather {
+			gs.Stats.Inventory = append(gs.Stats.Inventory[:i], gs.Stats.Inventory[i+1:]...)
+		}
+	}
+}
+
+func (gs *GameState) HaveFeather() bool {
+	for _, item := range gs.Stats.Inventory {
+		if item.Type == LuckyFeather {
+			return true
+		}
+	}
+	return false
+}
+
 func (gs GameState) ItemAt(line, col int) (Item, bool) {
 	for _, item := range gs.Items {
 		if item.Line == line && item.Col == col {
@@ -108,6 +125,13 @@ func (gs *GameState) UseMerchant(option int) (string, bool) {
 		gs.Stats.TotalXP += 10
 		gs.Stats.XPGained += 10
 		return "10 XP purchased", false
+	case 3:
+		if gs.Stats.Gold < 150 {
+			return "Not Enough Gold", false
+		}
+		gs.Stats.Gold -= 150
+		gs.Stats.Inventory = append(gs.Stats.Inventory, Item{Type: LuckyFeather})
+		return "Purchased a lucky feather!", false
 	default:
 		return "Good luck!", true
 	}

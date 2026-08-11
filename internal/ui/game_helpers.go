@@ -20,7 +20,10 @@ func (m *GameModel) LevelUp() {
 	case storage.TutorialMode:
 		m.gameState.MapInfo = game.GetMapInfo(nextLevel)
 		m.gameState.Stats.Gold += 20
-	case storage.RogueLikeMode:
+		if m.gameState.MapInfo.MapType == game.RoomMap {
+			m.printInstructionsRogue()
+		}
+	default:
 		m.gameState.MapInfo.Level++
 		level := m.gameState.MapInfo.Level
 		var height, width, rooms int
@@ -67,6 +70,16 @@ func (m *GameModel) CheckGameState() {
 		m.GameOver = true
 	}
 	if m.gameState.Stats.CurrentHealth <= 0 {
+		if m.gameState.HaveFeather() {
+			if m.GameType == storage.NoHitMode {
+				m.gameState.Stats.CurrentHealth = 1
+			} else {
+				m.gameState.Stats.CurrentHealth = 10
+			}
+			m.gameState.UseFeather()
+			m.AddMessage("Lucky feather used! You've been given another chance at life!")
+			return
+		}
 		m.GameOver = true
 	}
 }
@@ -153,12 +166,38 @@ func GetHelpMenu() string {
 		"  :w      - Check level completion",
 		"  :wq     - Complete and continue",
 		"  :help   - Toggle help menu",
+		"  :guide  - Basic guide",
 		"  :hideUI - Hides side panels",
 		"  :debug  - Toggle debug info"}
 
 	return strings.Join(sections, "\n")
 
 }
+
+func (m *GameModel) printInstructionsRogue() {
+	m.AddMessage("Always pay attention to the game messages!")
+	m.AddMessage("Make sure to collect chests which look like \u233A")
+	m.AddMessage(`Try to reach the stairs "^" and then press SPACE to use them`)
+	m.AddMessage(`Make sure to spend your gold when you see the merchant ($)`)
+	m.AddMessage(`Type ":help" to see all commands`)
+}
+
+func (m *GameModel) printInstructionsHC() {
+	m.AddMessage("You are playing HARDCORE! One hit will end the run!")
+	m.AddMessage("Make sure to collect chests which look like \u233A")
+	m.AddMessage(`Try to reach the stairs "^" and then press SPACE to use them`)
+	m.AddMessage(`Make sure to spend your gold when you see the merchant ($)`)
+	m.AddMessage(`Type ":help" to see all commands`)
+}
+
+func (m *GameModel) printInstructionsEditor() {
+	m.AddMessage("Always pay attention to the game messages!")
+	m.AddMessage("Reading the instructions before editing is recommended")
+	m.AddMessage(`If you get stuck you can UNDO each edit one by one with "u"`)
+	m.AddMessage(`If you don't know what your code is supposed to look like, try to copy the text at the bottom`)
+	m.AddMessage(`Type ":help" to see all commands`)
+}
+
 func DisplayHealth(currHP, maxHP int) string {
 	healthInfo := fmt.Sprintf("Current Health: %v/%v", currHP, maxHP)
 	if currHP <= 5 {
@@ -219,7 +258,7 @@ func (m GameModel) displayRightPanel() string {
 func (m GameModel) displayShop() string {
 	panelcolors := m.makePanel()
 	barSizeRight := int(float64(m.width) * 0.20)
-	options := []string{"1. Health Potion - 15 Gold", "2. 10 XP - 40 Gold", "3. Leave Shop"}
+	options := []string{"1. Health Potion - 15 Gold", "2. 10 XP - 40 Gold", "3. Lucky Feather - 150 Gold", "4. Leave Shop"}
 	rightBar := panelcolors.Width(barSizeRight).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, options...))
 	return rightBar
 }
@@ -228,9 +267,13 @@ func (m GameModel) ShowStats() string {
 	playerLevel := fmt.Sprintf("Player Level: %v\nXP: %v/10\n", m.gameState.Stats.PlayerLevel, m.gameState.Stats.XPGained)
 	mapLevel := fmt.Sprintf("Floor: %v\n", m.gameState.MapInfo.Level)
 	potionCount := 0
+	luckyFeather := 0
 	for _, item := range m.gameState.Stats.Inventory {
 		if item.Type == game.HealthPotion {
 			potionCount++
+		}
+		if item.Type == game.LuckyFeather {
+			luckyFeather++
 		}
 	}
 	charStats := fmt.Sprintf("\nAttack Damage: %v\nCrit Chance: %v%%\nCrit Multi: %vx\n", m.gameState.Stats.BaseDmg, m.gameState.Stats.CritChance, m.gameState.Stats.BaseCritMulti)
@@ -243,6 +286,16 @@ func (m GameModel) ShowStats() string {
 		} else {
 			potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 6 health! Potions Available: %v\n", potionCount)
 		}
+	}
+	if m.GameType == storage.NoHitMode {
+		if potionCount > 0 {
+			potionsAvailable = fmt.Sprintf("Broken Health Potion Bottles: %v", potionCount)
+		}
+	}
+	feather := ""
+	if luckyFeather != 0 {
+		feather = "Lucky Feather will restore health if you die!"
+		return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, xpInfo, feather)
 	}
 	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, xpInfo)
 

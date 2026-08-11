@@ -29,7 +29,8 @@ func (gs *GameState) SpawnEnemy(maxEnemies int) {
 	for {
 		line := rand.IntN(height)
 		col := rand.IntN(width)
-		if gs.Player.Line == line && gs.Player.Column == col {
+		distanceFromPlayer := getDiff(gs.Player.Line, line) + getDiff(gs.Player.Column, col)
+		if distanceFromPlayer <= 2 {
 			continue
 		}
 		if IsWall(*gs, line, col) {
@@ -83,7 +84,7 @@ func MakeMeleer(line, col int) EnemyInfo {
 	return newMob
 }
 
-//Zanth is a friend who loves playing tank, so this is a mob dedicated to him
+// Zanth is a friend who loves playing tank, so this is a mob dedicated to him
 func MakeTank(line, col int) EnemyInfo {
 	var newMob EnemyInfo
 	newMob.Health = 40
