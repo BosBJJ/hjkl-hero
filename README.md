@@ -40,7 +40,9 @@ Download the latest prebuilt binary for your operating system from:
 - [GitHub Releases](https://github.com/BosBJJ/hjkl-hero/releases)
 - [itch.io](https://sbrlabworks.itch.io/hjkl-hero)
 
-Extract the archive and add the executable to your `PATH`, or run it directly.
+Windows: Extract the downloaded `.zip` file and run `hjkl-hero.exe`.
+
+Linux: Extract the downloaded archive and run `hjkl-hero`. Optionally, add the executable to your `PATH` to run it from anywhere.
 
 ### Install with Go
 Install the binary directly to your `GOBIN`:
@@ -70,8 +72,8 @@ floors and upgrade your stats to make it easier to reach the end.
 ## Basic Controls
 
 - `h j k l` - Move
-- `x` - Delete character below cursor/attack enemy one tile away
-- `d` + direction - Delete characters in specified direction/directional ranged attack
+- `x` - Delete character below cursor/MELEE ATK - attack enemy one tile away
+- `d` + direction - Delete characters in specified direction/RANGED ATK- 4 tile directional ranged attack
 - `space` - Interact
 - `:q!` - Quit out of the game
 - `:help` Show all commands
@@ -82,6 +84,7 @@ Switch through them by going to the `OPTIONS` screen and selecting `Game Type`
 
 - Tutorial - Goes through currently written commands, gives a small playground to try them out on.
 - Rogue - Use commonly used keys to kill monsters, progress through maps, gather loot and explore procedurally generated maps.
+- Hardcore - Rogue mode where you only have 1 point of health, taking any damage will end the run.
 
 ## Roadmap
 
