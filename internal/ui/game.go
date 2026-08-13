@@ -119,10 +119,9 @@ func (m GameModel) ViewGameHorizontal() string {
 			lipgloss.Left,
 			editorStyle.Render(editorInfo),
 		))
-		hint := "\n\n Once your text above looks like the answer below use :w, make sure to always check the game messages"
-		answer := "\n------------------------------------------------------------------------"
+		hint := m.displayStringHelper("Once your text above looks like the answer below use :w, make sure to always check the game messages")
 		solution := levels.GetAnswer(m.gameState.MapInfo.Level)
-		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, answer, string(solution)))
+		center = lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, string(solution)))
 	}
 	rightBar := m.displayRightPanel()
 	if m.MerchantMode {
@@ -159,10 +158,9 @@ func (m GameModel) ViewGameVertical() string {
 			lipgloss.Left,
 			editorStyle.Render(editorInfo),
 		))
-		hint := "\n\n Once your text above looks like the answer below use :w\n Make sure to always check the game messages"
-		answer := "\n----------------------------------------------"
+		hint := m.displayStringHelper("Once your text above looks like the answer below use :w, Make sure to always check the game messages")
 		solution := levels.GetAnswer(m.gameState.MapInfo.Level)
-		center = lipgloss.NewStyle().Width(m.width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, answer, string(solution)))
+		center = lipgloss.NewStyle().Width(m.width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, string(solution)))
 	}
 	rightBar := m.displayRightPanelVertical()
 	if m.MerchantMode {

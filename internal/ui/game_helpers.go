@@ -11,9 +11,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// If terminal isn't at least 1.6x wider than it is tall, my own terminal 192x43 - horizontal, 108x80 - vertical
+// If terminal isn't at least 1.5x wider than it is tall, my own terminal 192x43 - horizontal, 108x80 - vertical
 func (m GameModel) IsVertical() bool {
-	return float64(m.width)/float64(m.height) < 1.6
+	return float64(m.width)/float64(m.height) < 1.5
 }
 
 func (m *GameModel) LevelUp() {
@@ -259,8 +259,8 @@ func DisplayHealth(currHP, maxHP int) string {
 	return style.FullHealth.Render(healthInfo)
 }
 
-func (gs *GameModel) makePanel() lipgloss.Style {
-	colors := style.MakePanelColor(gs.SelectedTheme)
+func (m *GameModel) makePanel() lipgloss.Style {
+	colors := style.MakePanelColor(m.SelectedTheme)
 	return lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(style.GetColor(colors.WallColor)).
@@ -341,11 +341,21 @@ func (m GameModel) displayRightPanelVertical() string {
 	)
 	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
 		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
-		content := lipgloss.JoinHorizontal(lipgloss.Center, helpMenu)
+	content := lipgloss.JoinHorizontal(lipgloss.Center, helpMenu)
 	if m.DebugMenu {
 		content = lipgloss.JoinHorizontal(lipgloss.Left, helpMenu, gameDebugInfo)
 	}
 	return panelcolors.Width(m.width).Height(barSize).Render(content)
+}
+
+func (m GameModel) displayStringHelper(content string) string {
+	colors := style.MakePanelColor(m.SelectedTheme)
+	panelcolors := lipgloss.NewStyle().
+		Background(style.GetColor(colors.WallColor)).
+		Padding(1).
+		Foreground(style.GetColor(colors.FloorColor)).
+		Bold(true)
+	return panelcolors.Render(content)
 }
 
 func (m GameModel) displayShop() string {

@@ -92,7 +92,7 @@ func CreateCustomTheme(db *sql.DB) error {
 	VALUES (?,?,?,?,?,?,?);
 	`
 
-	_, err = db.Exec(query, 1, "magenta", "green", "red", "#", ".", "#")
+	_, err = db.Exec(query, 1, "magenta", "green", "red", "#", ".", "@")
 
 	return err
 }
