@@ -6,13 +6,19 @@ A terminal based Vim motion game.
 
 ![Main Menu](screenshots/MainMenu.png)
 
-![Tutorial Example](screenshots/TutorialMode.png)
+<table>
+  <tr>
+    <td><img src="screenshots/TutorialMode.png" alt="Tutorial Example" width="500"></td>
+    <td><img src="screenshots/RogueMode.png" alt="Rogue Mode Example" width="500"></td>
+  </tr>
+</table>
 
-![Rogue Mode Example](screenshots/RogueMode.png)
-
-![Theme Editor](screenshots/ThemeEditor.png)
-
-![Vertical Mode](screenshots/Vertical.png)
+<table>
+  <tr>
+    <td><img src="screenshots/ThemeEditor.png" alt="Theme Editor" width="700"></td>
+    <td><img src="screenshots/Vertical.png" alt="Vertical Mode" width="350"></td>
+  </tr>
+</table>
 
 ## Motivation
 
