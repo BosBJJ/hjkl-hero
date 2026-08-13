@@ -98,7 +98,7 @@ type RunStats struct {
 	DamageTaken int
 }
 
-func (m GameModel) ViewGame() string {
+func (m GameModel) ViewGameHorizontal() string {
 	barSizeLeft := int(float64(m.width) * 0.18)
 	barSizeRight := int(float64(m.width) * 0.24)
 	lowBar := m.width - barSizeLeft - barSizeRight
@@ -113,7 +113,7 @@ func (m GameModel) ViewGame() string {
 		healthInfo,
 	))
 	leftBar := m.displayLeftPanel()
-	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
+	center := lipgloss.NewStyle().Width(m.camera.Width).Height(m.camera.Height - 2).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
 	if m.gameState.MapInfo.MapType == game.EditorMap {
 		bottomBar = lipgloss.NewStyle().Width(lowBar).Render(lipgloss.JoinHorizontal(
 			lipgloss.Left,
@@ -129,19 +129,57 @@ func (m GameModel) ViewGame() string {
 		rightBar = m.displayShop()
 	}
 	if m.height <= 27 {
-		leftBar = ""
-		rightBar = ""
-		center = "Please increase your terminal height"
+		return "Please increase your terminal height"
 	}
 	if m.width <= 156 {
-		leftBar = ""
-		rightBar = ""
-		center = "Please increase your terminal width"
+		return "Please increase your terminal width"
 	}
 	if m.HideUI {
 		leftBar = lipgloss.NewStyle().Width(barSizeLeft).Render("")
 		rightBar = lipgloss.NewStyle().Width(barSizeRight).Render("use :hideUI to bring back panels")
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, leftBar, center, rightBar)
+}
 
+func (m GameModel) ViewGameVertical() string {
+	currentMap := render.Render(m.gameState, m.camera, m.SelectedTheme)
+	editorInfo := fmt.Sprintf("Editor Mode: %v  %v\nCommandText: %v", m.EditorMode, m.CmdCount, m.CmdText)
+	editorStyle := lipgloss.NewStyle().Width(30)
+	healthInfo := DisplayHealth(m.gameState.Stats.CurrentHealth, m.gameState.Stats.MaxHealth)
+	bottomBar := lipgloss.JoinHorizontal(
+		lipgloss.Left,
+		editorStyle.Render(editorInfo),
+		editorStyle.Render(""),
+		healthInfo,
+	)
+	leftBar := m.displayLeftPanelVertical()
+	center := lipgloss.NewStyle().Width(m.width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Center, currentMap, bottomBar))
+	if m.gameState.MapInfo.MapType == game.EditorMap {
+		bottomBar = lipgloss.NewStyle().Width(m.width).Render(lipgloss.JoinHorizontal(
+			lipgloss.Left,
+			editorStyle.Render(editorInfo),
+		))
+		hint := "\n\n Once your text above looks like the answer below use :w\n Make sure to always check the game messages"
+		answer := "\n----------------------------------------------"
+		solution := levels.GetAnswer(m.gameState.MapInfo.Level)
+		center = lipgloss.NewStyle().Width(m.width).Height(m.camera.Height).Align(lipgloss.Center).Render(lipgloss.JoinVertical(lipgloss.Left, currentMap, bottomBar, hint, answer, string(solution)))
+	}
+	rightBar := m.displayRightPanelVertical()
+	if m.MerchantMode {
+		rightBar = m.displayShop()
+	}
+	if m.height <= 78 {
+		return "Please increase your terminal height"
+	}
+	if m.width <= 92 {
+		return "Please increase your terminal width"
+	}
+	return lipgloss.JoinVertical(lipgloss.Center, leftBar, center, rightBar)
+}
+
+func (m GameModel) ViewGame() string {
+	if m.IsVertical() {
+		return m.ViewGameVertical()
+	}
+	return m.ViewGameHorizontal()
 }

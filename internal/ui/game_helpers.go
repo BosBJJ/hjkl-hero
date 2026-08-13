@@ -11,6 +11,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// If terminal isn't at least 1.6x wider than it is tall, my own terminal 192x43 - horizontal, 108x80 - vertical
+func (m GameModel) IsVertical() bool {
+	return float64(m.width)/float64(m.height) < 1.6
+}
+
 func (m *GameModel) LevelUp() {
 	m.CmdText = ""
 	m.MessageLog = nil
@@ -134,6 +139,7 @@ func (m EditorMode) String() string {
 	}
 }
 
+// AnyChanges - Add to Vertical func below
 func GetHelpMenu() string {
 	sections := []string{
 		"Movement",
@@ -174,6 +180,50 @@ func GetHelpMenu() string {
 
 }
 
+// AnyChanges - Add to func above
+func GetHelpMenuVertical() string {
+	left := []string{
+		"Movement",
+		"  H J K L  - Move cursor",
+		"  W        - Next WORD",
+		"  B        - Previous WORD",
+		"  E        - End of WORD",
+		"  w        - Next word",
+		"  b        - Previous word",
+		"  e        - End of word",
+		"  0        - Start of line",
+		"  $        - End of line",
+
+		"",
+		"Counts",
+		"  5j      - Move down 5 lines",
+		"  3x      - Delete 3 characters",
+	}
+	right := []string{
+		"Commands",
+		"  :q      - End current game",
+		"  :q!     - Quit immediately",
+		"  :w      - Check level completion",
+		"  :wq     - Complete and continue",
+		"  :help   - Toggle help menu",
+		"  :guide  - Basic guide",
+		"  :hideUI - Hides side panels",
+		"  :debug  - Toggle debug info",
+
+		"",
+		"Actions",
+		"  X       - Delete / Melee ATK",
+		"  D       - Delete Mode / Ranged ATK",
+		"  R       - Replace Mode / Level Up",
+		"  P       - Drink Health Potion",
+
+		"",
+	}
+	leftCol := strings.Join(left, "\n")
+	rightCol := strings.Join(right, "\n")
+	return lipgloss.JoinHorizontal(lipgloss.Top, lipgloss.NewStyle().Width(40).Render(leftCol), lipgloss.NewStyle().Width(40).Render(rightCol))
+}
+
 func (m *GameModel) printInstructionsRogue() {
 	m.AddMessage("Always pay attention to the game messages!")
 	m.AddMessage("Make sure to collect chests which look like \u233A")
@@ -208,6 +258,7 @@ func DisplayHealth(currHP, maxHP int) string {
 	}
 	return style.FullHealth.Render(healthInfo)
 }
+
 func (gs *GameModel) makePanel() lipgloss.Style {
 	colors := style.MakePanelColor(gs.SelectedTheme)
 	return lipgloss.NewStyle().
@@ -220,18 +271,36 @@ func (gs *GameModel) makePanel() lipgloss.Style {
 		Bold(true)
 }
 
+// AnyChanges - Add to func below
 func (m GameModel) displayLeftPanel() string {
 	panelcolors := m.makePanel()
 	barSizeLeft := int(float64(m.width) * 0.18)
 	stats := m.ShowStats()
 	messages := m.ShowMessages()
-	leftBar := panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, stats, "Game Messages", "-----------------------------", messages))
+	xpInfo := fmt.Sprintf("\n%v", m.LevelMsg)
+	leftBar := panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, stats, xpInfo, "Game Messages", "-----------------------------", messages))
 	if m.gameState.MapInfo.MapType == game.EditorMap {
 		leftBar = panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, "Game Messages", "-----------------------------", messages))
 	}
 	return leftBar
 }
 
+// AnyChanges - Add to func above
+func (m GameModel) displayLeftPanelVertical() string {
+	barSize := 24
+	panelcolors := m.makePanel()
+	stats := m.ShowStats()
+	xpInfo := fmt.Sprintf("\n%v", m.LevelMsg)
+	messages := m.ShowMessages()
+	msgs := lipgloss.NewStyle().Width(40).Height(24).Render(lipgloss.JoinVertical(lipgloss.Left, "Game Messages", "------------------------", messages, xpInfo))
+	leftBar := panelcolors.Width(m.width).MaxHeight(barSize).Render(lipgloss.JoinHorizontal(lipgloss.Left, stats, "                  ", msgs))
+	if m.gameState.MapInfo.MapType == game.EditorMap {
+		leftBar = panelcolors.Width(m.width).Height(24).Render(lipgloss.JoinVertical(lipgloss.Left, msgs))
+	}
+	return leftBar
+}
+
+// AnyChanges - Add to func below
 func (m GameModel) displayRightPanel() string {
 	panelcolors := m.makePanel()
 	height, width := game.GetMapSize(m.gameState)
@@ -246,13 +315,37 @@ func (m GameModel) displayRightPanel() string {
 		m.camera.Width, m.camera.Height,
 		height, width,
 	)
+	gameDebugInfo := fmt.Sprintf("\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
+		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
+	content := lipgloss.JoinVertical(lipgloss.Center, helpMenu)
+	if m.DebugMenu {
+		content = lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo)
+	}
+	return panelcolors.Width(barSizeRight).Height(m.height - 2).Render(content)
+}
+
+// AnyChanges - Add to func above
+func (m GameModel) displayRightPanelVertical() string {
+	panelcolors := m.makePanel()
+	barSize := 20
+	height, width := game.GetMapSize(m.gameState)
+	helpMenu := "Type :help to display help menu"
+	if m.HelpMenu == true {
+		helpMenu = GetHelpMenuVertical()
+	}
+	termInfo := fmt.Sprintf(
+		"Terminal: %dx%d\nCamera: %dx%d\nMap: %dx%d",
+		m.width, m.height,
+		m.camera.Width, m.camera.Height,
+		height, width,
+	)
 	gameDebugInfo := fmt.Sprintf("\n\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
 		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
-	rightBar := panelcolors.Width(barSizeRight).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Center, helpMenu))
+		content := lipgloss.JoinHorizontal(lipgloss.Center, helpMenu)
 	if m.DebugMenu {
-		rightBar = panelcolors.Width(barSizeRight).Height(m.camera.Height).Render(lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo))
+		content = lipgloss.JoinHorizontal(lipgloss.Left, helpMenu, gameDebugInfo)
 	}
-	return rightBar
+	return panelcolors.Width(m.width).Height(barSize).Render(content)
 }
 
 func (m GameModel) displayShop() string {
@@ -260,6 +353,9 @@ func (m GameModel) displayShop() string {
 	barSizeRight := int(float64(m.width) * 0.20)
 	options := []string{"1. Health Potion - 15 Gold", "2. 10 XP - 40 Gold", "3. Lucky Feather - 150 Gold", "4. Leave Shop"}
 	rightBar := panelcolors.Width(barSizeRight).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, options...))
+	if m.IsVertical() {
+		rightBar = panelcolors.Width(m.width).Height(20).Render(lipgloss.JoinVertical(lipgloss.Left, options...))
+	}
 	return rightBar
 }
 
@@ -278,13 +374,12 @@ func (m GameModel) ShowStats() string {
 	}
 	charStats := fmt.Sprintf("\nAttack Damage: %v\nCrit Chance: %v%%\nCrit Multi: %vx\n", m.gameState.Stats.BaseDmg, m.gameState.Stats.CritChance, m.gameState.Stats.BaseCritMulti)
 	goldCount := fmt.Sprintf("Gold: %v\n", m.gameState.Stats.Gold)
-	xpInfo := fmt.Sprintf("\n%v", m.LevelMsg)
 	potionsAvailable := fmt.Sprintf("Potions Available: %v\n\n\n", potionCount)
 	if potionCount > 0 {
 		if m.gameState.Stats.CurrentHealth >= m.gameState.Stats.MaxHealth {
-			potionsAvailable = fmt.Sprintf("Use P to drink potion and overheal for 3 health! Potions Available: %v\n", potionCount)
+			potionsAvailable = fmt.Sprintf("Use P to drink potion and overheal for 3 health!\nPotions Available: %v\n", potionCount)
 		} else {
-			potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 6 health! Potions Available: %v\n", potionCount)
+			potionsAvailable = fmt.Sprintf("Use P to drink potion and heal for 6 health!\nPotions Available: %v\n", potionCount)
 		}
 	}
 	if m.GameType == storage.NoHitMode {
@@ -295,11 +390,11 @@ func (m GameModel) ShowStats() string {
 	feather := ""
 	if luckyFeather != 0 {
 		feather = "Lucky Feather will restore health if you die!"
-		return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, xpInfo, feather)
+		return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, feather)
 	}
-	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable, xpInfo)
-
+	return lipgloss.JoinVertical(lipgloss.Left, mapLevel, goldCount, playerLevel, charStats, potionsAvailable)
 }
+
 func (m *GameModel) AddMessage(msg string) {
 	if msg == "" {
 		return

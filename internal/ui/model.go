@@ -137,9 +137,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.Game.height = m.height
 				m.Game.width = m.width
-				m.Game.camera.Height = m.height - 4
-				sides := int(float64(m.width) * 0.20)
-				m.Game.camera.Width = m.width - sides - sides
+
+				if m.Game.IsVertical() {
+					m.Game.camera.Height = m.height - 25 - 25
+					m.Game.camera.Width = m.width
+				} else {
+					m.Game.camera.Height = m.height - 4
+					sides := int(float64(m.width) * 0.20)
+					m.Game.camera.Width = m.width - sides - sides
+				}
 				m.Game.AdjustCamera()
 				m.Screen = GameScreen
 				m.Menu.Selected = -1

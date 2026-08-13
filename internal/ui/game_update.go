@@ -24,9 +24,14 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.camera.Height = m.height - 4
-		sides := int(float64(m.width) * 0.20)
-		m.camera.Width = m.width - sides - sides
+		if m.IsVertical() {
+			m.camera.Height = m.height - 30 - 30
+			m.camera.Width = m.width
+		} else {
+			m.camera.Height = m.height - 4
+			sides := int(float64(m.width) * 0.20)
+			m.camera.Width = m.width - sides - sides
+		}
 		m.AdjustCamera()
 	}
 	return m, nil
@@ -46,9 +51,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 				if m.gameState.Stats.XPGained >= 10 {
 					switch m.GameType {
 					case storage.NoHitMode:
-						m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+						m.LevelMsg = "Press r to level up!\nd- damage\nc- crit chance\nm- crit multiplier\n"
 					default:
-						m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+						m.LevelMsg = "Press r to level up!\nh- health\nd- damage\nc- crit chance\nm- crit multiplier\n"
 					}
 				}
 			}
@@ -69,10 +74,10 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.AddMessage(chase)
 			m.CheckGameState()
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '^' {
-				m.AddMessage("You have reached the stairs! Press SPACE to go to next floor!")
+				m.AddMessage("Press SPACE to go to next floor!")
 			}
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '+' {
-				m.AddMessage("You have found a chest! Press SPACE to go unlock it!")
+				m.AddMessage("Press SPACE to unlock chest!")
 			}
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
 				m.AddMessage("Press SPACE to trade merchant!")
@@ -117,9 +122,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 					if m.gameState.Stats.XPGained >= 10 {
 						switch m.GameType {
 						case storage.NoHitMode:
-							m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+							m.LevelMsg = "Press r to level up!\nd- damage\nc- crit chance\nm- crit multiplier\n"
 						default:
-							m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+							m.LevelMsg = "Press r to level up!\nh- health\nd- damage\nc- crit chance\nm- crit multiplier\n"
 						}
 					}
 				}
@@ -217,9 +222,9 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 					if m.gameState.Stats.XPGained >= 10 {
 						switch m.GameType {
 						case storage.NoHitMode:
-							m.LevelMsg = "Press r to level up! d- damage, c- crit chance, m- crit multiplier\n"
+							m.LevelMsg = "Press r to level up!\nd- damage\nc- crit chance\nm- crit multiplier\n"
 						default:
-							m.LevelMsg = "Press r to level up! h- health, d- damage, c- crit chance, m- crit multiplier\n"
+							m.LevelMsg = "Press r to level up!\nh- health\nd- damage\nc- crit chance\nm- crit multiplier\n"
 						}
 					}
 				}
