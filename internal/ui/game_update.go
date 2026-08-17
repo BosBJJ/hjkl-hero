@@ -62,6 +62,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		switch msg.String() {
 		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
 			m.CmdCount = m.CmdCount*10 + int(msg.String()[0]-'0') //take first byte, remove '0' which is 48 and then it should be the normal value, make into int
+			if m.CmdCount > 9999 {
+				m.CmdCount = 9999
+			}
 		case "h", "j", "k", "l":
 			direction := msg.String()
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
@@ -99,6 +102,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "0":
 			if m.CmdCount > 0 {
 				m.CmdCount = m.CmdCount * 10
+				if m.CmdCount > 9999 {
+					m.CmdCount = 9999
+				}
 			} else {
 				m.gameState.JumpToStart()
 			}

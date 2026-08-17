@@ -10,6 +10,9 @@ func CmdRepeater(gs *GameState, count int, cmd func(*GameState)) {
 	if count == 0 {
 		count = 1
 	}
+	if count > 9999 {
+		count = 9999
+	}
 	for range count {
 		cmd(gs)
 	}
