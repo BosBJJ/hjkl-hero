@@ -13,6 +13,7 @@ type GameState struct {
 	MapInfo  MapInfo
 	undoSnap []SnapShot
 	redoSnap []SnapShot
+	yanked   YankBuffer
 }
 
 type PlayerInfo struct {
@@ -34,6 +35,11 @@ type PlayerInfo struct {
 type SnapShot struct {
 	PlayerSnapShot Position
 	MapSnapShot    []string
+}
+
+type YankBuffer struct {
+	IsLine bool
+	Yanked [][]rune
 }
 
 type EnemyInfo struct {

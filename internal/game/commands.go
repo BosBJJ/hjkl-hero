@@ -2,6 +2,7 @@ package game
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 )
@@ -256,10 +257,88 @@ func (gs *GameState) JumpToPrevWord() {
 	}
 }
 
+func (gs *GameState) yank(text [][]rune) {
+	gs.yanked = YankBuffer{
+		Yanked: text,
+	}
+}
+
+func (gs *GameState) YankWord() {
+	pos, exists := gs.nextWordPos()
+	if !exists {
+		return
+	}
+	lines := ToLines(*gs)
+	start := gs.Player
+	end := pos
+	runes := []rune(lines[start.Line])
+	text := [][]rune{runes[start.Column:end.Column]}
+	gs.yank(text)
+}
+
+func (gs *GameState) YankLine() {
+	lines := ToLines(*gs)
+	runes := []rune(lines[gs.Player.Line])
+	gs.yank([][]rune{runes})
+	gs.yanked.IsLine = true
+}
+
+func (gs *GameState) PasteYanked(after bool) {
+	if gs.MapInfo.MapType != EditorMap {
+		return
+	}
+	lines := ToLines(*gs)
+	if gs.yanked.IsLine {
+		gs.pasteYankedLine(lines, after)
+		return
+	}
+	gs.pasteYankedText(lines, after)
+}
+
+func (gs *GameState) pasteYankedText(lines []string, after bool) {
+	insertAt := gs.Player
+	if after {
+		insertAt.Column++
+	}
+	gs.TakeSnapShot(insertAt, lines)
+	runes := []rune(lines[insertAt.Line])
+	yanked := gs.yanked.Yanked[0]
+	runes = append(runes[:insertAt.Column], append(yanked, runes[insertAt.Column:]...)...)
+	gs.Player.Column = insertAt.Column + len(yanked) - 1
+	lines[insertAt.Line] = string(runes)
+	gs.MapInfo.LevelMap = levels.LevelMap(ToText(lines))
+}
+
+func (gs *GameState) pasteYankedLine(lines []string, after bool) {
+	insertAt := gs.Player
+	if after {
+		insertAt.Line++
+	}
+	gs.TakeSnapShot(insertAt, lines)
+	yanked := make([]string, len(gs.yanked.Yanked))
+	for i, line := range gs.yanked.Yanked {
+		yanked[i] = string(line)
+	}
+	lines = slices.Insert(lines, insertAt.Line, yanked...)
+	gs.Player.Line = gs.Player.Line + len(yanked)
+	gs.MapInfo.LevelMap = levels.LevelMap(ToText(lines))
+}
+
 func isSpaceOrSymbol(r rune) bool {
 	return r == ' ' || isSymbol(r)
 }
 
 func isSymbol(r rune) bool {
 	return r == '.' || r == ',' || r == '?' || r == '!' || r == ';'
+}
+
+// Test Func, delete later
+func (gs *GameState) DisplayYank() string {
+	var sb strings.Builder
+	for _, line := range gs.yanked.Yanked {
+		for _, rune := range line {
+			sb.WriteString(string(rune))
+		}
+	}
+	return sb.String()
 }

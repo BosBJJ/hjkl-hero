@@ -54,6 +54,15 @@ var Maps = map[int]LevelMap{
  You can also use "d" to enter delete mode and then select a direction
  When you're done playing around just undo everything and save the map with the asterisk line deleted`,
 	6: `
+ Yanking (copy) and pasting is something
+ You'll be probably doing a lot of, theres a lot of different
+ ways of using it, but the most common way I use it is by
+ pressing "y" to enter yank mode and then "y" to yank the current
+ line, to try that out, copy the line below by pressing "y" and "y" and then paste it with "p"
+ ********************************************************
+ Then try to copy ***** and put it inside the curly braces {}, to do this have the cursor
+ on the first asterisk and then press "y" to enter yank mode and "w" to copy the word, go to the { and press "p"`,
+	7: `
  That's all for the current tutorial maps, more to be made in the future
  Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.
@@ -63,7 +72,7 @@ var Maps = map[int]LevelMap{
  If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
  harder and has procedurally generated maps`,
 
-	7: `###################################
+	8: `###################################
 #.................................#
 #.................................#
 ###############...#############..##
@@ -78,7 +87,7 @@ var Maps = map[int]LevelMap{
 #.................................#
 ###################################`,
 
-	8: `###################################
+	9: `###################################
 ###################################
 ###################################
 #######################...........#
@@ -133,6 +142,16 @@ var AnswerMap = map[int]LevelMap{
  You can also use "d" to enter delete mode and then select a direction
  When you're done playing around just undo everything and save the map with the asterisk line deleted`,
 	6: `
+ Yanking (copy) and pasting is something
+ You'll be probably doing a lot of, theres a lot of different
+ ways of using it, but the most common way I use it is by
+ pressing "y" to enter yank mode and then "y" to yank the current
+ line, to try that out, copy the line below by pressing "y" and "y" and then paste it with "p"
+ ********************************************************
+ ********************************************************
+ Then try to copy ***** and put it inside the curly braces {***** }, to do this have the cursor
+ on the first asterisk and then press "y" to enter yank mode and "w" to copy the word, go to the { and press "p"`,
+	7: `
  That's all for the current tutorial maps, more to be made in the future
  Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.

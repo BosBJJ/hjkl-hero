@@ -122,6 +122,7 @@ const (
 	ReplaceMode
 	DeleteMode
 	CommandMode
+	YankMode
 )
 
 func (m EditorMode) String() string {
@@ -134,6 +135,8 @@ func (m EditorMode) String() string {
 		return "Delete Mode"
 	case CommandMode:
 		return "Command Mode"
+	case YankMode:
+		return "Yank Mode"
 	default:
 		return "InvalidMode"
 	}
@@ -158,7 +161,8 @@ func GetHelpMenu() string {
 		"  X       - Delete / Melee ATK",
 		"  D       - Delete Mode / Ranged ATK",
 		"  R       - Replace Mode / Level Up",
-		"  P       - Drink Health Potion",
+		"  P       - Paste / Drink Potion",
+		"  Y       - Yank Mode / Grab Item",
 
 		"",
 		"Counts",
@@ -215,7 +219,8 @@ func GetHelpMenuVertical() string {
 		"  X       - Delete / Melee ATK",
 		"  D       - Delete Mode / Ranged ATK",
 		"  R       - Replace Mode / Level Up",
-		"  P       - Drink Health Potion",
+		"  P       - Paste / Drink Potion",
+		"  Y       - Yank Mode / Grab Item",
 
 		"",
 	}
@@ -315,8 +320,8 @@ func (m GameModel) displayRightPanel() string {
 		m.camera.Width, m.camera.Height,
 		height, width,
 	)
-	gameDebugInfo := fmt.Sprintf("\nPlayer Position - %v %v\nGame Type: %v\nEnemies: %v\nMoves: %v\n\n%v",
-		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, len(m.gameState.Enemies), m.TotalMoves, termInfo)
+	gameDebugInfo := fmt.Sprintf("\nPlayer Position - %v %v\nGame Type: %v / Moves: %v\nEnemies: %v\n\n%v",
+		m.gameState.Player.Line, m.gameState.Player.Column, m.gameState.MapInfo.MapType, m.TotalMoves, len(m.gameState.Enemies), termInfo)
 	content := lipgloss.JoinVertical(lipgloss.Center, helpMenu)
 	if m.DebugMenu {
 		content = lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo)

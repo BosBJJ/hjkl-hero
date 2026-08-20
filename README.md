@@ -81,6 +81,7 @@ floors and upgrade your stats to make it easier to reach the end.
 
 - `h j k l` - Move
 - `x` - Delete character below cursor/MELEE ATK - attack enemy one tile away
+- `y` - Pick up item/enter YANK mode
 - `d` + direction - Delete characters in specified direction/RANGED ATK- 4 tile directional ranged attack
 - `space` - Interact
 - `:q!` - Quit out of the game

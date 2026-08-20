@@ -8,6 +8,19 @@ import (
 	"github.com/BosBJJ/hjkl-hero/internal/levels"
 )
 
+func (t ItemType) String() string {
+	switch t {
+	case HealthPotion:
+		return "Health Potion"
+	case Gold:
+		return "Gold"
+	case LuckyFeather:
+		return "Lucky Feather"
+	default:
+		return "UnknownItem"
+	}
+}
+
 func (gs *GameState) DropItem(line, col, amount int, itemType ItemType) {
 	newItem := Item{
 		Type:   itemType,

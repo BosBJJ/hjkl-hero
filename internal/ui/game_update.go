@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"github.com/BosBJJ/hjkl-hero/internal/game"
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,6 +22,8 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 			return m.updateDelete(msg)
 		case m.EditorMode == CommandMode:
 			return m.updateCommand(msg)
+		case m.EditorMode == YankMode:
+			return m.updateYank(msg)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -85,8 +89,10 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.MapInfo.MapType == game.RoomMap && m.gameState.GetTile(m.gameState.Player.Line, m.gameState.Player.Column) == '$' {
 				m.AddMessage("Press SPACE to trade merchant!")
 			}
-			grabbed := m.gameState.GrabItem()
-			m.AddMessage(grabbed)
+			item, hasItem := m.gameState.ItemAt(m.gameState.Player.Line, m.gameState.Player.Column)
+			if m.gameState.MapInfo.MapType == game.RoomMap && hasItem {
+				m.AddMessage(fmt.Sprintf(`Press "y" to collect %v`, item.Type))
+			}
 		case "w":
 			m.gameState.JumpToNext()
 		case "W":
@@ -111,8 +117,15 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "$":
 			m.gameState.JumpToLast()
 		case "p":
-			if m.GameType != storage.NoHitMode {
+			if m.GameType == storage.TutorialMode {
+				m.gameState.PasteYanked(true)
+			}
+			if m.GameType != storage.NoHitMode && m.GameType != storage.TutorialMode {
 				m.gameState.UsePotion()
+			}
+		case "P":
+			if m.GameType == storage.TutorialMode {
+				m.gameState.PasteYanked(false)
 			}
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
@@ -143,6 +156,15 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "d":
 			m.PendingCmd = true
 			m.EditorMode = DeleteMode
+		case "y":
+			if m.gameState.MapInfo.MapType != game.EditorMap {
+				grabbed := m.gameState.GrabItem()
+				m.AddMessage(grabbed)
+			}
+			if m.gameState.MapInfo.MapType == game.EditorMap {
+				m.PendingCmd = true
+				m.EditorMode = YankMode
+			}
 		case "u":
 			if m.gameState.MapInfo.MapType == game.EditorMap {
 				game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
@@ -205,6 +227,7 @@ func (m GameModel) updateReplace(msg tea.Msg) (GameModel, tea.Cmd) {
 	}
 	return m, nil
 }
+
 func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -321,6 +344,29 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 		}
 	default:
 		m.CmdText += key.String()
+	}
+	return m, nil
+}
+
+func (m GameModel) updateYank(msg tea.Msg) (GameModel, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if m.PendingCmd {
+			key := msg.String()
+			if key == "esc" {
+				m.EditorMode = NormalMode
+				m.PendingCmd = false
+				return m, nil
+			}
+		}
+		switch msg.String() {
+		case "y":
+			m.gameState.YankLine()
+		case "w":
+			m.gameState.YankWord()
+		}
+		m.EditorMode = NormalMode
+		m.PendingCmd = false
 	}
 	return m, nil
 }
