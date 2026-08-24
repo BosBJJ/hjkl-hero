@@ -101,6 +101,9 @@ func Render(gs game.GameState, cam game.Camera, themeID storage.ThemeID) string 
 				}
 			}
 		}
+		if y == playerY && playerX == len(row) && gs.MapInfo.MapType == game.EditorMap {
+			rendered.WriteString(style.CursorStyle.Render(string(" ")))
+		}
 		rendered.WriteByte('\n')
 	}
 	return rendered.String()

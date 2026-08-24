@@ -97,7 +97,7 @@ Switch through them by going to the `OPTIONS` screen and selecting `Game Type`
 
 ## Roadmap
 
-- [ ] More tutorial maps/additional commands
+- [x] More tutorial maps/additional commands
 - [ ] Items in rogue mode
 - [ ] Character classes
 - [ ] Endless mode - when finished you can restart while keeping some stats, increases difficulty

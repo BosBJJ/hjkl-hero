@@ -2,8 +2,11 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/BosBJJ/hjkl-hero/internal/game"
+	"github.com/BosBJJ/hjkl-hero/internal/levels"
 	"github.com/BosBJJ/hjkl-hero/internal/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -24,6 +27,10 @@ func (m GameModel) Update(msg tea.Msg) (GameModel, tea.Cmd) {
 			return m.updateCommand(msg)
 		case m.EditorMode == YankMode:
 			return m.updateYank(msg)
+		case m.EditorMode == TypingMode:
+			return m.updateTyping(msg)
+		case m.EditorMode == ChangeMode:
+			return m.updateChangeMode(msg)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -99,6 +106,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			m.gameState.JumpToNextWord()
 		case "b":
 			m.gameState.JumpToPrev()
+		case "z": //TEST, DELETE
+			curr := m.gameState.PrintCurrWord()
+			m.AddMessage(curr)
 		case "B":
 			m.gameState.JumpToPrevWord()
 		case "e":
@@ -156,6 +166,9 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "d":
 			m.PendingCmd = true
 			m.EditorMode = DeleteMode
+		case "c":
+			m.PendingCmd = true
+			m.EditorMode = ChangeMode
 		case "y":
 			if m.gameState.MapInfo.MapType != game.EditorMap {
 				grabbed := m.gameState.GrabItem()
@@ -164,6 +177,26 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 			if m.gameState.MapInfo.MapType == game.EditorMap {
 				m.PendingCmd = true
 				m.EditorMode = YankMode
+			}
+		case "o":
+			if m.gameState.MapInfo.MapType == game.EditorMap {
+				m.gameState.InsertNewLine()
+				m.AdjustCamera()
+				m.EditorMode = TypingMode
+			}
+		case "a":
+			if m.gameState.MapInfo.MapType == game.EditorMap {
+				lines := game.ToLines(m.gameState)
+				m.gameState.TakeSnapShot(m.gameState.Player, lines)
+				m.gameState.Player.Column++
+				m.TypeAfter = true
+				m.EditorMode = TypingMode
+			}
+		case "i":
+			if m.gameState.MapInfo.MapType == game.EditorMap {
+				lines := game.ToLines(m.gameState)
+				m.gameState.TakeSnapShot(m.gameState.Player, lines)
+				m.EditorMode = TypingMode
 			}
 		case "u":
 			if m.gameState.MapInfo.MapType == game.EditorMap {
@@ -238,9 +271,15 @@ func (m GameModel) updateDelete(msg tea.Msg) (GameModel, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
+			if key == "i" && m.gameState.MapInfo.MapType == game.EditorMap {
+				m.Inner = true
+				return m, nil
+			}
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {
 				if m.gameState.MapInfo.MapType == game.EditorMap {
-					m.gameState.DeleteDirection(key)
+					m.gameState.DeleteDirection(key, m.Inner)
+					m.Inner = false
+					m.AdjustCamera()
 				} else {
 					combatLog := gs.RangedAttack(key)
 					cmbMsg := combatLog.ParseLog()
@@ -275,6 +314,23 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 		m.CmdText = ""
 		return m, nil
 	case "enter":
+		if levelRequested, found := strings.CutPrefix(m.CmdText, "goto-"); found {
+			if m.GameType != storage.TutorialMode {
+				m.AddMessage("Command only allowed in tutorial mode")
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+				return m, nil
+			}
+			level, err := strconv.Atoi(levelRequested)
+			availableLevels := levels.GetLevelsCount()
+			if err != nil || level <= 0 || level > availableLevels-1 {
+				m.AddMessage("Invalid tutorial level")
+				m.CmdText = ""
+				m.EditorMode = NormalMode
+				return m, nil
+			}
+			m.GoToLevel(level)
+		}
 		switch m.CmdText {
 		case "q":
 			m.GameOver = true
@@ -348,6 +404,28 @@ func (m GameModel) updateCommand(msg tea.Msg) (GameModel, tea.Cmd) {
 	return m, nil
 }
 
+func (m GameModel) updateTyping(msg tea.Msg) (GameModel, tea.Cmd) {
+	key := msg.(tea.KeyMsg)
+	switch key.String() {
+	case "esc":
+		if m.TypeAfter {
+			m.gameState.Player.Column--
+		}
+		m.EditorMode = NormalMode
+		m.TypeAfter = false
+		return m, nil
+	case "enter":
+		m.gameState.InsertNewLine()
+		m.AdjustCamera()
+	case "backspace":
+		m.gameState.DeleteLeft()
+	default:
+		m.gameState.InsertInto(key.Runes[0])
+		m.AdjustCamera()
+	}
+	return m, nil
+}
+
 func (m GameModel) updateYank(msg tea.Msg) (GameModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -358,12 +436,45 @@ func (m GameModel) updateYank(msg tea.Msg) (GameModel, tea.Cmd) {
 				m.PendingCmd = false
 				return m, nil
 			}
+			if key == "i" && m.gameState.MapInfo.MapType == game.EditorMap {
+				m.Inner = true
+				return m, nil
+			}
 		}
 		switch msg.String() {
 		case "y":
 			m.gameState.YankLine()
 		case "w":
-			m.gameState.YankWord()
+			m.gameState.YankWord(m.Inner)
+			m.Inner = false
+		}
+		m.EditorMode = NormalMode
+		m.PendingCmd = false
+	}
+	return m, nil
+}
+
+func (m GameModel) updateChangeMode(msg tea.Msg) (GameModel, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		key := msg.String()
+		if m.PendingCmd {
+			if key == "esc" {
+				m.EditorMode = NormalMode
+				m.PendingCmd = false
+				return m, nil
+			}
+			if key == "i" && m.gameState.MapInfo.MapType == game.EditorMap {
+				m.Inner = true
+				return m, nil
+			}
+		}
+		switch key {
+		case "w":
+			m.gameState.ChangeText(m.Inner)
+			m.Inner = false
+			m.EditorMode = TypingMode
+			return m, nil
 		}
 		m.EditorMode = NormalMode
 		m.PendingCmd = false

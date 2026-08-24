@@ -67,7 +67,8 @@ func (m *GameModel) AdjustCamera() {
 
 func (m *GameModel) CheckGameState() {
 	if m.GameType == storage.TutorialMode {
-		if m.gameState.MapInfo.Level == 9 {
+		tutorialLevels := levels.GetLevelsCount()
+		if m.gameState.MapInfo.Level == tutorialLevels {
 			m.GameOver = true
 		}
 	}
@@ -123,6 +124,8 @@ const (
 	DeleteMode
 	CommandMode
 	YankMode
+	TypingMode
+	ChangeMode
 )
 
 func (m EditorMode) String() string {
@@ -137,6 +140,10 @@ func (m EditorMode) String() string {
 		return "Command Mode"
 	case YankMode:
 		return "Yank Mode"
+	case TypingMode:
+		return "Typing Mode"
+	case ChangeMode:
+		return "Change Mode"
 	default:
 		return "InvalidMode"
 	}
@@ -285,7 +292,8 @@ func (m GameModel) displayLeftPanel() string {
 	xpInfo := fmt.Sprintf("\n%v", m.LevelMsg)
 	leftBar := panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, stats, xpInfo, "Game Messages", "-----------------------------", messages))
 	if m.gameState.MapInfo.MapType == game.EditorMap {
-		leftBar = panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, "Game Messages", "-----------------------------", messages))
+		currLevel := fmt.Sprintf("Level - %v\n", m.gameState.MapInfo.Level)
+		leftBar = panelcolors.Width(barSizeLeft).Height(m.height - 2).Render(lipgloss.JoinVertical(lipgloss.Left, currLevel, "Game Messages", "-----------------------------", messages))
 	}
 	return leftBar
 }
@@ -326,6 +334,10 @@ func (m GameModel) displayRightPanel() string {
 	if m.DebugMenu {
 		content = lipgloss.JoinVertical(lipgloss.Left, helpMenu, gameDebugInfo)
 	}
+	if !m.HelpMenu && m.GameType == storage.TutorialMode {
+		tutorials := m.displayTutorials()
+		content = lipgloss.JoinVertical(lipgloss.Left, tutorials, "", helpMenu)
+	}
 	return panelcolors.Width(barSizeRight).Height(m.height - 2).Render(content)
 }
 
@@ -350,7 +362,39 @@ func (m GameModel) displayRightPanelVertical() string {
 	if m.DebugMenu {
 		content = lipgloss.JoinHorizontal(lipgloss.Left, helpMenu, gameDebugInfo)
 	}
+	if !m.HelpMenu && m.GameType == storage.TutorialMode {
+		tutorials := m.displayTutorials()
+		content = lipgloss.JoinVertical(lipgloss.Left, tutorials, "", helpMenu)
+	}
 	return panelcolors.Width(m.width).Height(barSize).Render(content)
+}
+
+func (m GameModel) displayTutorials() string {
+	title := "Tutorials"
+	instructions := `Use ":goto-#" to go to tutorial level`
+
+	availableMaps := []string{
+		"HJKL + replace mode",
+		"Multipliers",
+		"Jump to start/end of words",
+		"Jump to start/end of line",
+		"Delete Mode",
+		"Yank/Paste",
+		"Insert Text/Line",
+		"Inner Modifier/ciw",
+		"Rogue Instructions",
+		"Rogue Tutorial 1",
+		"Rogue Tutorial 2"}
+	var levels []string
+	for i, level := range availableMaps {
+		levels = append(levels, fmt.Sprintf("%2v. %v", i+1, level))
+	}
+	return strings.Join([]string{
+		title,
+		instructions,
+		"",
+		strings.Join(levels, "\n"),
+	}, "\n")
 }
 
 func (m GameModel) displayStringHelper(content string) string {
@@ -423,4 +467,11 @@ func (m *GameModel) AddMessage(msg string) {
 
 func (m GameModel) ShowMessages() string {
 	return strings.Join(m.MessageLog, "\n")
+}
+
+func (m *GameModel) GoToLevel(level int) {
+	m.gameState.MapInfo = game.GetMapInfo(level)
+	m.gameState.Enemies = nil
+	m.gameState.Player = m.gameState.SpawnPlayer()
+	m.AdjustCamera()
 }

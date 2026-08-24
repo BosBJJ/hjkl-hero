@@ -10,6 +10,11 @@ func (gs *GameState) nextWordPos() (Position, bool) {
 		for i := col + 1; i < len(runes); i++ {
 			currRune := runes[i-1]
 			nextRune := runes[i]
+			if currRune == ' ' && isSymbol(nextRune) {
+				wordPos.Column = i
+				wordPos.Line = line
+				return wordPos, true
+			}
 			if !isSpaceOrSymbol(currRune) && isSymbol(nextRune) {
 				wordPos.Column = i
 				wordPos.Line = line
@@ -174,4 +179,30 @@ func (gs *GameState) backWORDPos() (Position, bool) {
 		}
 	}
 	return wordPos, false
+}
+
+func (gs *GameState) findCurrWord() (start, end int) {
+	lines := ToLines(*gs)
+	col := gs.Player.Column
+	runes := []rune(lines[gs.Player.Line])
+	if runes[col] == ' ' && col < len(runes) {
+		col++
+	}
+	start = col
+	end = col
+	for start > 0 && !isSpaceOrSymbol(runes[start-1]) {
+		start--
+	}
+	for end < len(runes) && !isSpaceOrSymbol(runes[end]) {
+		end++
+	}
+	return start, end
+}
+
+func (gs *GameState) PrintCurrWord() string {
+	lines := ToLines(*gs)
+	runes := []rune(lines[gs.Player.Line])
+	start, end := gs.findCurrWord()
+	text := runes[start:end]
+	return string(text)
 }

@@ -14,8 +14,13 @@ func GetAnswer(level int) LevelMap {
 	return m
 }
 
+func GetLevelsCount() int {
+	return len(Maps) + 1
+}
+
 type LevelMap string
 
+// When adding maps, go to game_helpers/DisplayTutorial and add description
 var Maps = map[int]LevelMap{
 	1: `
  Use H J K L to move around, your goal is to get to
@@ -63,6 +68,25 @@ var Maps = map[int]LevelMap{
  Then try to copy ***** and put it inside the curly braces {}, to do this have the cursor
  on the first asterisk and then press "y" to enter yank mode and "w" to copy the word, go to the { and press "p"`,
 	7: `
+ Typing is very simple, we'll start by demonstrating what "i" and "a" do,
+ you'll notice that when we do type the cursor will always be highlighting
+ to the right of where we're typing, when we use "i" our cursor won't move
+ and we'll begin typing to the left of our current location, when we use "a" our
+ cursor moves one spot to the right and then we type to the left of that new position
+ place a "*" in () and (), the first one stop on the "(" and press "a", the second one stop
+ on the ")" and press "i" when you're done typing press "ESCAPE"
+ If you need to create a new line and type in it you can press "o" practice that by adding
+ the phrase "I love Vim" below.`,
+	8: `
+ Vim Motions has modifiers you can use, one of them is after you use a command you can press "i" to
+ tell it do this command "IN" something, we'll practice yanking, deleting, and changing words.
+ Our first task is to delete **** and we'll do that by going anywhere within the word and
+ pressing "d" for delete mode and then either "w" to go from the cursor to end or "i"+"w" to
+ target the entire word. Next we'll yank "y"+"i"+"w" and paste "p" the word "Rocks" by placing the
+ cursor on the dash "Vim-" The last task is to use change mode, an easy way to edit an entire word is by 
+ using "c"+"i"+"w", try changing "Vim is lame" to "Vim is awesome", remember when you're done typing
+ to press "ESCAPE"`,
+	9: `
  That's all for the current tutorial maps, more to be made in the future
  Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.
@@ -72,7 +96,7 @@ var Maps = map[int]LevelMap{
  If you enjoy it, go to OPTIONS and switch GAME MODE to ROGUE, it is
  harder and has procedurally generated maps`,
 
-	8: `###################################
+	10: `###################################
 #.................................#
 #.................................#
 ###############...#############..##
@@ -87,7 +111,7 @@ var Maps = map[int]LevelMap{
 #.................................#
 ###################################`,
 
-	9: `###################################
+	11: `###################################
 ###################################
 ###################################
 #######################...........#
@@ -152,6 +176,26 @@ var AnswerMap = map[int]LevelMap{
  Then try to copy ***** and put it inside the curly braces {***** }, to do this have the cursor
  on the first asterisk and then press "y" to enter yank mode and "w" to copy the word, go to the { and press "p"`,
 	7: `
+ Typing is very simple, we'll start by demonstrating what "i" and "a" do,
+ you'll notice that when we do type the cursor will always be highlighting
+ to the right of where we're typing, when we use "i" our cursor won't move
+ and we'll begin typing to the left of our current location, when we use "a" our
+ cursor moves one spot to the right and then we type to the left of that new position
+ place a "*" in () and (), the first one stop on the "(" and press "a", the second one stop
+ on the ")" and press "i" when you're done typing press "ESCAPE"
+ If you need to create a new line and type in it you can press "o" practice that by adding
+ the phrase "I love Vim" below.
+ I love Vim`,
+	8: `
+ Vim Motions has modifiers you can use, one of them is after you use a command you can press "i" to
+ tell it do this command "IN" something, we'll practice yanking, deleting, and changing words.
+ Our first task is to delete  and we'll do that by going anywhere within the word and
+ pressing "d" for delete mode and then either "w" to go from the cursor to end or "i"+"w" to
+ target the entire word. Next we'll yank "y"+"i"+"w" and paste "p" the word "Rocks" by placing the
+ cursor on the dash "Vim-Rocks" The last task is to use change mode, an easy way to edit an entire word is by 
+ using "c"+"i"+"w", try changing "Vim is awesome" to "Vim is awesome", remember when you're done typing
+ to press "ESCAPE"`,
+	9: `
  That's all for the current tutorial maps, more to be made in the future
  Now if you want to use the new keys you learned a lot in a game setting you can use ":wq" and
  the tutorials game mode will start, it is two levels on easy mode.

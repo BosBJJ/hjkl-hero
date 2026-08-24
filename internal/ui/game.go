@@ -87,6 +87,8 @@ type GameModel struct {
 	DebugMenu     bool
 	HideUI        bool
 	MerchantMode  bool
+	Inner         bool
+	TypeAfter     bool
 }
 
 type RunStats struct {
@@ -171,6 +173,10 @@ func (m GameModel) ViewGameVertical() string {
 	}
 	if m.width <= 92 {
 		return "Please increase your terminal width"
+	}
+	if m.HideUI {
+		leftBar = lipgloss.NewStyle().Render("")
+		rightBar = lipgloss.NewStyle().Render("use :hideUI to bring back panels")
 	}
 	return lipgloss.JoinVertical(lipgloss.Center, leftBar, center, rightBar)
 }

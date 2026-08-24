@@ -21,7 +21,7 @@ func CmdRepeater(gs *GameState, count int, cmd func(*GameState)) {
 
 // H and L aren't wrong or bugged, for some reason this is how actual VIM accepts these deletes based on position
 // J and K also aren't bugged.. VIM doesn't seem to like trying to delete current + next if there isnt a next
-func (gs *GameState) DeleteDirection(input string) {
+func (gs *GameState) DeleteDirection(input string, inner bool) {
 	if gs.MapInfo.MapType != EditorMap {
 		return
 	}
@@ -71,6 +71,19 @@ func (gs *GameState) DeleteDirection(input string) {
 			gs.Player.AdjustPlayer(mapLines)
 			runes = []rune(mapLines[gs.Player.Line])
 		}
+	case 'w':
+		gs.TakeSnapShot(gs.Player, mapLines)
+		if inner {
+			start, end := gs.findCurrWord()
+			runes = append(runes[:start], runes[end:]...)
+		} else {
+			wordPos, _ := gs.endWordPos()
+			if isSymbol(runes[gs.Player.Column]) {
+				runes = append(runes[:gs.Player.Column], runes[gs.Player.Column+1:]...)
+			} else {
+				runes = append(runes[:gs.Player.Column], runes[wordPos.Column+1:]...)
+			}
+		}
 	}
 	if len(mapLines) == 1 {
 		mapLines = []string{
@@ -117,6 +130,27 @@ func (gs *GameState) DeleteAt() {
 	}
 	changedLine := ToText(mapLines)
 	gs.Player.AdjustPlayer(mapLines)
+	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
+}
+
+func (gs *GameState) DeleteLeft() {
+	mapLines := ToLines(*gs)
+	if gs.Player.Line < 0 || gs.Player.Line >= len(mapLines) {
+		return
+	}
+	if gs.Player.Column <= 1 {
+		gs.Player.Column = 1
+		return
+	}
+	runes := []rune(mapLines[gs.Player.Line])
+	if len(runes) <= 1 {
+		mapLines[gs.Player.Line] = "  "
+		gs.Player.Column = 2
+	}
+	runes = append(runes[:gs.Player.Column-1], runes[gs.Player.Column:]...)
+	mapLines[gs.Player.Line] = string(runes)
+	changedLine := ToText(mapLines)
+	gs.Player.Column--
 	gs.MapInfo.LevelMap = levels.LevelMap(changedLine)
 }
 
@@ -263,7 +297,7 @@ func (gs *GameState) yank(text [][]rune) {
 	}
 }
 
-func (gs *GameState) YankWord() {
+func (gs *GameState) YankWord(inner bool) {
 	pos, exists := gs.nextWordPos()
 	if !exists {
 		return
@@ -271,6 +305,9 @@ func (gs *GameState) YankWord() {
 	lines := ToLines(*gs)
 	start := gs.Player
 	end := pos
+	if inner {
+		start.Column, end.Column = gs.findCurrWord()
+	}
 	runes := []rune(lines[start.Line])
 	text := [][]rune{runes[start.Column:end.Column]}
 	gs.yank(text)
@@ -288,6 +325,9 @@ func (gs *GameState) PasteYanked(after bool) {
 		return
 	}
 	lines := ToLines(*gs)
+	if gs.yanked.Yanked == nil {
+		return
+	}
 	if gs.yanked.IsLine {
 		gs.pasteYankedLine(lines, after)
 		return
@@ -329,7 +369,7 @@ func isSpaceOrSymbol(r rune) bool {
 }
 
 func isSymbol(r rune) bool {
-	return r == '.' || r == ',' || r == '?' || r == '!' || r == ';'
+	return r == '.' || r == ',' || r == '?' || r == '!' || r == ';' || r == '(' || r == ')' || r == '"' || r == '/'
 }
 
 // Test Func, delete later
@@ -341,4 +381,43 @@ func (gs *GameState) DisplayYank() string {
 		}
 	}
 	return sb.String()
+}
+
+func (gs *GameState) InsertInto(input rune) {
+	lines := ToLines(*gs)
+	insertAt := gs.Player
+	runes := []rune(lines[insertAt.Line])
+	runes = append(runes[:insertAt.Column], append([]rune{input}, runes[insertAt.Column:]...)...)
+	lines[insertAt.Line] = string(runes)
+	gs.Player.Column++
+	gs.MapInfo.LevelMap = levels.LevelMap(ToText(lines))
+}
+
+func (gs *GameState) InsertNewLine() {
+	lines := ToLines(*gs)
+	insertAt := gs.Player
+	gs.TakeSnapShot(insertAt, lines)
+	lines = slices.Insert(lines, insertAt.Line+1, "  ")
+	gs.Player.Line++
+	gs.Player.Column = 1
+	gs.MapInfo.LevelMap = levels.LevelMap(ToText(lines))
+}
+
+func (gs *GameState) ChangeText(inner bool) {
+	pos, exists := gs.nextWordPos()
+	if !exists {
+		return
+	}
+	lines := ToLines(*gs)
+	start := gs.Player
+	gs.TakeSnapShot(start, lines)
+	end := pos
+	if inner {
+		start.Column, end.Column = gs.findCurrWord()
+	}
+	runes := []rune(lines[start.Line])
+	runes = append(runes[:start.Column], runes[end.Column:]...)
+	lines[start.Line] = string(runes)
+	gs.Player = start
+	gs.MapInfo.LevelMap = levels.LevelMap(ToText(lines))
 }
