@@ -181,7 +181,7 @@ var AnswerMap = map[int]LevelMap{
  to the right of where we're typing, when we use "i" our cursor won't move
  and we'll begin typing to the left of our current location, when we use "a" our
  cursor moves one spot to the right and then we type to the left of that new position
- place a "*" in () and (), the first one stop on the "(" and press "a", the second one stop
+ place a "*" in (*) and (*), the first one stop on the "(" and press "a", the second one stop
  on the ")" and press "i" when you're done typing press "ESCAPE"
  If you need to create a new line and type in it you can press "o" practice that by adding
  the phrase "I love Vim" below.
