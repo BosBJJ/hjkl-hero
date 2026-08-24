@@ -18,3 +18,8 @@ func (gs *GameState) CurrentSnapShot() SnapShot {
 		MapSnapShot:    slices.Clone(ToLines(*gs)),
 	}
 }
+
+func (gs *GameState) ClearSnapShots() {
+	gs.undoSnap = nil
+	gs.redoSnap = nil
+}

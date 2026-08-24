@@ -25,6 +25,7 @@ func (m *GameModel) LevelUp() {
 	case storage.TutorialMode:
 		m.gameState.MapInfo = game.GetMapInfo(nextLevel)
 		m.gameState.Stats.Gold += 20
+		m.gameState.ClearSnapShots()
 		if m.gameState.MapInfo.MapType == game.RoomMap {
 			m.printInstructionsRogue()
 		}
@@ -473,5 +474,6 @@ func (m *GameModel) GoToLevel(level int) {
 	m.gameState.MapInfo = game.GetMapInfo(level)
 	m.gameState.Enemies = nil
 	m.gameState.Player = m.gameState.SpawnPlayer()
+	m.gameState.ClearSnapShots()
 	m.AdjustCamera()
 }
