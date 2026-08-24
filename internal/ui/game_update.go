@@ -129,6 +129,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "p":
 			if m.GameType == storage.TutorialMode {
 				m.gameState.PasteYanked(true)
+				m.AdjustCamera()
 			}
 			if m.GameType != storage.NoHitMode && m.GameType != storage.TutorialMode {
 				m.gameState.UsePotion()
@@ -136,6 +137,7 @@ func (m GameModel) updateNormal(msg tea.Msg) (GameModel, tea.Cmd) {
 		case "P":
 			if m.GameType == storage.TutorialMode {
 				m.gameState.PasteYanked(false)
+				m.AdjustCamera()
 			}
 		case "x":
 			game.CmdRepeater(&m.gameState, m.CmdCount, func(gs *game.GameState) {

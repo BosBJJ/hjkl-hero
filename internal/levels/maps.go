@@ -185,7 +185,7 @@ var AnswerMap = map[int]LevelMap{
  on the ")" and press "i" when you're done typing press "ESCAPE"
  If you need to create a new line and type in it you can press "o" practice that by adding
  the phrase "I love Vim" below.
- I love Vim`,
+ I love Vim `,
 	8: `
  Vim Motions has modifiers you can use, one of them is after you use a command you can press "i" to
  tell it do this command "IN" something, we'll practice yanking, deleting, and changing words.
