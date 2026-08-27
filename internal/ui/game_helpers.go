@@ -32,6 +32,7 @@ func (m *GameModel) LevelUp() {
 	default:
 		m.gameState.MapInfo.Level++
 		level := m.gameState.MapInfo.Level
+		level = min(level, 15)
 		var height, width, rooms int
 		height = 60 + (level-1)*2
 		width = 80 + (level-1)*4
@@ -73,8 +74,9 @@ func (m *GameModel) CheckGameState() {
 			m.GameOver = true
 		}
 	}
-	if m.gameState.MapInfo.Level > 15 {
+	if m.gameState.MapInfo.Level > 15 && !m.Endless {
 		m.GameOver = true
+		m.GameWon = true
 	}
 	if m.gameState.Stats.CurrentHealth <= 0 {
 		if m.gameState.HaveFeather() {

@@ -80,6 +80,8 @@ type GameModel struct {
 	MessageLog    []string
 	LevelMsg      string
 	GameOver      bool
+	GameWon       bool
+	Endless       bool
 	TotalMoves    int
 	GameType      storage.GameMode
 	SelectedTheme storage.ThemeID

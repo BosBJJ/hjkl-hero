@@ -30,7 +30,7 @@ func (gs *GameState) SpawnEnemy(maxEnemies int) {
 		line := rand.IntN(height)
 		col := rand.IntN(width)
 		distanceFromPlayer := getDiff(gs.Player.Line, line) + getDiff(gs.Player.Column, col)
-		if distanceFromPlayer <= 2 {
+		if distanceFromPlayer <= 4 {
 			continue
 		}
 		if IsWall(*gs, line, col) {
@@ -139,7 +139,7 @@ func (gs *GameState) ChasePlayer() string {
 				enemy.MoveCount = 0
 			}
 		}
-		if lineDiff <= 1 && colDiff <= 1 {
+		if (lineDiff == 1 && colDiff == 0) || (lineDiff == 0 && colDiff == 1) {
 			combatMsg = gs.TryDamagePlayer()
 			clone = *enemy
 		}

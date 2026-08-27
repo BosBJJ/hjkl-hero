@@ -34,9 +34,13 @@ func (p *Position) Move(direction string, gs GameState) {
 		if IsWall(gs, newPos.Line, newPos.Column) {
 			return
 		}
+		if _, exists := gs.EnemyAt(newPos.Line, newPos.Column); exists {
+			return
+		}
 	}
 	*p = newPos
 }
+
 func (p *Position) AdjustPlayer(lines []string) {
 	if len(lines) == 0 {
 		p.Line = 0

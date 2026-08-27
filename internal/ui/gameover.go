@@ -17,6 +17,8 @@ type GameOverModel struct {
 	GameOverMode GameOverMode
 	PlayerName   string
 	Stats        RunStats
+	GameWon      bool
+	Endless      bool
 }
 type GameOverMode int
 
@@ -33,6 +35,14 @@ func MakeGameOver() GameOverModel {
 	}
 }
 
+func MakeGameOverWon() GameOverModel {
+	return GameOverModel{
+		Options:    []string{"ENDLESS MODE", "Save to Leaderboard", "Quit"},
+		Selected:   -1,
+		PlayerName: "Player",
+	}
+}
+
 func (m GameOverModel) UpdateGameOver(msg tea.Msg) (GameOverModel, tea.Cmd) {
 	switch m.GameOverMode {
 	case MenuMode:
@@ -42,6 +52,7 @@ func (m GameOverModel) UpdateGameOver(msg tea.Msg) (GameOverModel, tea.Cmd) {
 	}
 	return m, nil
 }
+
 func (m GameOverModel) updateMenu(msg tea.Msg) (GameOverModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -58,12 +69,28 @@ func (m GameOverModel) updateMenu(msg tea.Msg) (GameOverModel, tea.Cmd) {
 				m.Cursor--
 			}
 		case "enter":
-			if m.Cursor == 0 {
-				m.GameOverMode = EntryMode
-				return m, nil
+			if m.GameWon {
+				switch m.Cursor {
+				case 0:
+					m.Selected = m.Cursor
+					m.Endless = true
+				case 1:
+					m.GameOverMode = EntryMode
+					m.Cursor = 0
+					return m, nil
+				default:
+					m.Selected = m.Cursor
+					m.Cursor = 0
+				}
 			} else {
-				m.Selected = m.Cursor
-				m.Cursor = 0
+				if m.Cursor == 0 {
+					m.GameOverMode = EntryMode
+					return m, nil
+				}
+				if m.Cursor == 1 {
+					m.Selected = m.Cursor
+					m.Cursor = 0
+				}
 			}
 		}
 	}

@@ -81,6 +81,7 @@ func (gs *GameState) UseFeather() {
 	for i, item := range gs.Stats.Inventory {
 		if item.Type == LuckyFeather {
 			gs.Stats.Inventory = append(gs.Stats.Inventory[:i], gs.Stats.Inventory[i+1:]...)
+			return
 		}
 	}
 }
@@ -110,7 +111,7 @@ func (gs *GameState) OpenChest(line, col int) string {
 	gs.MapInfo.LevelMap = levels.LevelMap(strings.Join(mapLines, "\n"))
 	roll := rand.IntN(4)
 	switch roll {
-	case 4, 3:
+	case 3:
 		gs.DropPotion(line, col)
 		obtained = gs.GrabItem()
 	default:

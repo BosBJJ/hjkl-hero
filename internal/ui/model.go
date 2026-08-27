@@ -63,7 +63,6 @@ func NewModel(db *sql.DB) Model {
 	return Model{
 		Menu:            menu,
 		Game:            game,
-		GameOver:        MakeGameOver(),
 		Settings:        MakeSettingsModel(db, settings),
 		HighScores:      MakeHighScores(),
 		CurrentSettings: settings,
@@ -100,6 +99,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		if m.Game.gameState.MapInfo.MapType == game.RoomMap {
 			mobCap := m.Game.gameState.MapInfo.Level + 4
+			if m.Game.GameWon {
+				levelsPastWin := m.Game.gameState.MapInfo.Level - 15
+				mobCap = 20 + levelsPastWin*2
+			}
 			switch m.CurrentSettings.GameMode {
 			case storage.TutorialMode:
 				m.Game.gameState.SpawnEnemy(2)
@@ -165,15 +168,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			game, cmd := m.Game.Update(msg)
 			m.Game = game
 			if game.GameOver {
+				if game.GameWon && !game.Endless {
+					m.GameOver = MakeGameOverWon()
+					m.GameOver.GameWon = true
+				} else {
+					m.GameOver = MakeGameOver()
+				}
 				m.GameOver.Stats = GetRunStats(m.Game)
+				m.GameOver.width = m.width
+				m.GameOver.height = m.height
 				m.Screen = GameOverScreen
 			}
 			return m, cmd
 		case GameOverScreen:
 			gameOver, cmd := m.GameOver.UpdateGameOver(msg)
 			m.GameOver = gameOver
+			if m.GameOver.GameWon && gameOver.Selected == 0 {
+				m.Game.GameOver = false
+				m.GameOver.GameWon = false
+				m.Game.Endless = true
+				m.Screen = GameScreen
+			}
+			leaderboardOption := 0
+			quitOption := 1
+			if gameOver.GameWon {
+				leaderboardOption = 1
+				quitOption = 2
+			}
 			switch gameOver.Selected {
-			case 0:
+			case leaderboardOption:
 				storage.SaveRun(m.DB, storage.Run{
 					PlayerName:  gameOver.PlayerName,
 					Kills:       gameOver.Stats.Kills,
@@ -188,7 +211,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Screen = HighScoresScreen
 				m.GameOver.Selected = -1
 				m.GameOver.PlayerName = "Player"
-			case 1:
+			case quitOption:
 				m.Screen = MainMenuScreen
 				m.GameOver.Selected = -1
 			}
