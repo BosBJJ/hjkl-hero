@@ -27,8 +27,8 @@ const (
 
 func MakeGameOver() GameOverModel {
 	return GameOverModel{
-		Options:  []string{"Save to Leaderboard", "Quit"},
-		Selected: -1,
+		Options:    []string{"Save to Leaderboard", "Quit"},
+		Selected:   -1,
 		PlayerName: "Player",
 	}
 }

@@ -139,7 +139,7 @@ func (gs *GameState) ChasePlayer() string {
 				enemy.MoveCount = 0
 			}
 		}
-		if clone.Location == gs.Player {
+		if lineDiff <= 1 && colDiff <= 1 {
 			combatMsg = gs.TryDamagePlayer()
 			clone = *enemy
 		}
