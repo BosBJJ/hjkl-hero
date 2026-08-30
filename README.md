@@ -52,6 +52,8 @@ Windows: Extract the downloaded `.zip` file and run `hjkl-hero.exe`.
 
 Linux: Extract the downloaded archive and run `hjkl-hero`. Optionally, add the executable to your `PATH` to run it from anywhere.
 
+itch.io app: Search for `HJKL-Hero`, select download for Windows/Linux, future updates will automatically be fetched.
+
 ### Install with Go
 Install the binary directly to your `GOBIN`:
 ```bash
@@ -97,10 +99,8 @@ Switch through them by going to the `OPTIONS` screen and selecting `Game Type`
 
 ## Roadmap
 
-- [x] More tutorial maps/additional commands
-- [ ] Items in rogue mode
+- [ ] Additional items in rogue mode
 - [ ] Character classes
-- [ ] Endless mode - when finished you can restart while keeping some stats, increases difficulty
 - [ ] Improve enemy pathing
 
 
